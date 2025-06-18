@@ -249,4 +249,37 @@ class SynopticMeteorologyAnalyzer:
         
         return fig, centers
         
+    def generate_weather_report(self, df, centers):
+        """
+        Gera relatório meteorológico automático
+        """
+        report = []
+        report.append(f"RELAÓRIO METEORÓLOGICO - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        report.append("=" * 60)
+
+        # Estatisticas gerais
+        report.append("\nCONDIÇÕES GERAIS: ")
+        report.append(f"Temperatura Média: {df['temperature'].mean():.1f} °C")
+        report.append(f"Pressão Média: {df['pressure'].mean():.1f} hPa")
+        report.append(f"Umidade Média: {df['humidity'].mean():.1f} %")
+        report.append(f"Velocidade do Vento Média: {df['wind_speed'].mean():.1f} m/s")
+
+        # Análise de sistemas de pressão
+        if centers:
+            report.append(f"\nSISTEMAS DE PRESSÃO IDENTIFICADOS: {len(centers)}")
+            for i, center in enumerate(centers, 1):
+                system_type = "ALTA PRESSÃO" if center['type'] == 'HIGH' else "BAIXA PRESSÃO"
+                report.append(f"{i}. {system_type}")
+                report.append(f" Localização: {center['lat']:.2f}°S, {abs(center['lon']):.2f}°W")
+                report.append(f" Pressão central: {center['pressure']:.1f} hPa")
         
+        # Condições por região
+        report.append("\nCONDICOES POR REGIAO: ")
+        for _, row in df.iterrows():
+            report.append(f"\n{row['city']}:")
+            report.append(f" Temperatura: {row['temperature']:.1f} °C")
+            report.append(f" Pressão: {row['pressure']:.1f} hPa")
+            report.append(f" Umidade: {row['humidity']:.1f} %")
+            report.append(f" Vento: {row['wind_speed']:.1f} m/s, {row['wind_direction']:.1f}°")
+
+        return "\n".join(report)
