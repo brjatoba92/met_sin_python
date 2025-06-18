@@ -9,6 +9,8 @@ from scipy.interpolate import griddata
 from datetime import datetime, timedelta
 import warnings
 warnings.filterwarnings("ignore")
+from scipy.ndimage import maximum_filter, minimum_filter
+import os
 
 class SynopticMeteorologyAnalyzer:
     def __init__(self, api_key=None):
@@ -37,7 +39,24 @@ class SynopticMeteorologyAnalyzer:
                 {"name": "Porto Alegre", "lat": -30.0346, "lon": -51.2177},
                 {"name": "Curitiba", "lat": -25.4244, "lon": -49.2654},
                 {"name": "Recife", "lat": -8.0476, "lon": -34.8770},
-                {"name": "Belém", "lat": -1.4558, "lon": -48.5044}
+                {"name": "Belém", "lat": -1.4558, "lon": -48.5044},
+                {"name": "Belo Horizonte", "lat": -19.9167, "lon": -43.9333},
+                {"name": "Boa Vista", "lat": 2.8236, "lon": -60.6753},
+                {"name": "Florianópolis", "lat": -27.5945, "lon": -48.5477},
+                {"name": "Porto Velho", "lat": -8.7619, "lon": -63.9037},
+                {"name": "João Pessoa", "lat": -7.1250, "lon": -34.8567},
+                {"name": "Teresina", "lat": -5.0892, "lon": -42.7700},
+                {"name": "Aracaju", "lat": -10.9472, "lon": -37.0731},
+                {"name": "Campo Grande", "lat": -20.4697, "lon": -54.6201},
+                {"name": "Cuiabá", "lat": -15.6014, "lon": -56.0979},
+                {"name": "Goiânia", "lat": -16.6869, "lon": -49.2648},
+                {"name": "Macapá", "lat": 0.0349, "lon": -51.0694},
+                {"name": "Maceió", "lat": -9.6658, "lon": -35.7350},
+                {"name": "Natal", "lat": -5.7945, "lon": -35.2110},
+                {"name": "Palmas", "lat": -10.1840, "lon": -48.3336},
+                {"name": "Rio Branco", "lat": -9.9747, "lon": -67.8243},
+                {"name": "São Luís", "lat": -2.5307, "lon": -44.3068},
+                {"name": "Vitória", "lat": -20.3155, "lon": -40.3128},
             ]
         
         weather_data = []
@@ -117,7 +136,7 @@ class SynopticMeteorologyAnalyzer:
         """
         Detecta centros de alta e baixa pressão
         """
-        from scipy.ndimage import maximum_filter, minimum_filter
+        
 
         # Filtros para encontrar máximos e mínimos locais
         max_filter = maximum_filter(pressure_field, size=5)
@@ -208,8 +227,8 @@ class SynopticMeteorologyAnalyzer:
             
             # Plotar direção do vento
             if row['wind_speed'] > 1:
-                dx = 0.5 * np.sin(np.radians(row['wind_direction']))
-                dy = 0.5 * np.cos(np.radians(row['wind_direction']))
+                dx = 0.5 * np.sin(np.radians(row['wind_dir']))
+                dy = 0.5 * np.cos(np.radians(row['wind_dir']))
                 ax.arrow(row['lon'], row['lat'], dx, dy,
                         head_width=0.2, head_length=0.2, fc='red', ec='red',
                         transform=ccrs.PlateCarree())
@@ -280,6 +299,37 @@ class SynopticMeteorologyAnalyzer:
             report.append(f" Temperatura: {row['temperature']:.1f} °C")
             report.append(f" Pressão: {row['pressure']:.1f} hPa")
             report.append(f" Umidade: {row['humidity']:.1f} %")
-            report.append(f" Vento: {row['wind_speed']:.1f} m/s, {row['wind_direction']:.1f}°")
+            report.append(f" Vento: {row['wind_speed']:.1f} m/s, {row['wind_dir']:.1f}°")
 
         return "\n".join(report)
+
+if __name__ == "__main__":
+     # Inicializar analisador (sem API key usará dados simulados)
+    analyzer = SynopticMeteorologyAnalyzer() 
+    #analyzer = SynopticMeteorologyAnalyzer(api_key='SUA_CHAVE_API')
+    
+    # Coletar dados meteorologicos
+    weather_df = analyzer.get_weather_data()
+    print(f"Dados coletados de {len(weather_df)} estações meteorológicas.")
+
+    # Criar pasta 'resultados' se não existir
+    resultados_dir = "resultados"
+    os.makedirs(resultados_dir, exist_ok=True)
+
+    # Criar carta sinótica
+    print("Gerando carta sinótica...")
+    fig, pressure_centers = analyzer.create_synoptic_chart(
+        weather_df, 
+        save_path=os.path.join(resultados_dir, 'carta_sinotica.png')
+    )
+
+    # Gerar relatório meteorológico
+    print("Gerando relatório meteorológico...")
+    report = analyzer.generate_weather_report(weather_df, pressure_centers)
+    print("\n" + report)
+
+    # Salvar relatório
+    with open(os.path.join(resultados_dir, "relatorio_meteorologico.txt"), "w", encoding="utf-8") as f:
+        f.write(report)
+    
+    plt.show()
