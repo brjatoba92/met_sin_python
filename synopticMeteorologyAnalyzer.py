@@ -152,3 +152,101 @@ class SynopticMeteorologyAnalyzer:
                 })
         
         return high_centers + low_centers
+    
+    def create_synoptic_chart(self, df, save_path=None):
+        """
+        Cria carta sinotica com analise automática
+        """
+
+        fig = plt.figure(figsize=(15, 12))
+
+        # Configurar projeção
+        ax = plt.axes(projection=ccrs.PlateCarree())
+        ax.set_extent([-75, -30, -35, 10], crs=ccrs.PlateCarree())
+
+        # Adicionar caracteristicas geograficas
+        ax.add_feature(cfeature.COASTLINE)
+        ax.add_feature(cfeature.BORDERS)
+        ax.add_feature(cfeature.STATES, alpha=0.5)
+        ax.add_feature(cfeature.OCEAN, color='lightblue', alpha=0.5)
+        ax.add_feature(cfeature.LAND, color='lightgray', alpha=0.5)
+
+        # Interpolar campo de pressão
+        lon_mesh, lat_mesh, pressure_field = self.interpolate_field(df, 'pressure')
+
+        # Plotar isolinhas de pressão
+        pressure_contours = ax.contour(
+            lon_mesh, lat_mesh, pressure_field,
+            levels=np.arange(980, 1040, 4),
+            colors='black',
+            linewidths=1,
+            transform=ccrs.PlateCarree()
+        )
+        ax.clabel(pressure_contours, inline=True, fontsize=8, fmt='%d')
+
+        # Detectar e plotar centros de pressão
+        centers = self.detect_pressure_centers(lon_mesh, lat_mesh, pressure_field)
+
+        for center in centers:
+            if center['type'] == 'HIGH':
+                ax.plot(center['lon'], center['lat'], 'ro', markersize=12, 
+                        transform=ccrs.PlateCarree())
+                ax.text(center['lon'], center['lat'], 'A',
+                        ha='center', va='center', fontsize=14, fontweight='bold',
+                        transform=ccrs.PlateCarree())
+            else:
+                ax.plot(center['lon'], center['lat'], 'bo', markersize=12, 
+                        transform=ccrs.PlateCarree())
+                ax.text(center['lon'], center['lat'], 'B',
+                        ha='center', va='center', fontsize=14, fontweight='bold',
+                        transform=ccrs.PlateCarree())
+        
+        # Plotar estações meteorológicas
+        for _, row in df.iterrows():
+            ax.plot(row['lon'], row['lat'], 'ko', markersize=8, 
+                    transform=ccrs.PlateCarree())
+            
+            # Plotar direção do vento
+            if row['wind_speed'] > 1:
+                dx = 0.5 * np.sin(np.radians(row['wind_direction']))
+                dy = 0.5 * np.cos(np.radians(row['wind_direction']))
+                ax.arrow(row['lon'], row['lat'], dx, dy,
+                        head_width=0.2, head_length=0.2, fc='red', ec='red',
+                        transform=ccrs.PlateCarree())
+        
+        lon_mesh_temp, lat_mesh_temp, temp_field = self.interpolate_field(df, 'temperature')
+        # Plotar isolinhas de temperatura
+        temp_contours = ax.contourf(
+            lon_mesh_temp, lat_mesh_temp, temp_field,
+            levels=np.arange(0, 40, 2),
+            alpha=0.3,
+            cmap='RdYlBu_r',
+            transform=ccrs.PlateCarree()
+        )
+
+        # Adicionar barra de cores para temperatura
+        cbar = plt.colorbar(temp_contours, ax=ax, shrink=0.7, pad=0.1)
+        cbar.set_label('Temperatura (°C)', fontsize=12)
+
+        # Configurações do gráfico
+        ax.gridlines(draw_labels=True, alpha=0.5)
+        plt.title(f'Carta Sinótica - {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}', fontsize=16, fontweight='bold')
+
+        # Adicionar legenda
+        legend_elements = [
+            plt.Line2D([0], [0], marker='o', color='w', label='Alta Pressão', markersize=8),
+            plt.Line2D([0], [0], marker='o', color='w', label='Baixa Pressão', markersize=8),
+            plt.Line2D([0], [0], marker='o', color='w', label='Estação Meteorológica', markersize=8),
+            plt.Line2D([0], [0], marker='o', color='red', label='Direção do Vento', markersize=8)
+        ]
+        ax.legend(handles=legend_elements, loc='upper left', bbox_to_anchor=(0, 1))
+
+        plt.tight_layout()
+
+        if save_path:
+            plt.savefig(save_path, dpi=300)
+            print(f"Carta sinótica salva em: {save_path}")
+        
+        return fig, centers
+        
+        
