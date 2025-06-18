@@ -144,9 +144,13 @@ CONDIÇÕES POR CIDADE:
 ## **📜 Licença**  
 Este projeto é open-source (MIT). Sinta-se à vontade para **contribuir, modificar e distribuir**!  
 
-🔗 **GitHub**: [SeuRepositório](https://github.com/seuusuário)  
-📧 **Contato**: seuemail@exemplo.com  
+🔗 **GitHub**: [SeuRepositório](https://github.com/brjatoba92/met_sin_python)  
+📧 **Contato**: [E-mail](brunojatobadev@gmail.com)  
 
 --- 
 
 **🌟 Dúvidas? Sugestões? Abra uma *issue* ou contribua!**
+
+---
+
+# Detecção e Reastreador de Sistemas Meteorológicos

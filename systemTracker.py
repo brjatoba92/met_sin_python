@@ -79,5 +79,52 @@ class WeatherSystemTracker:
         temperature += noise
 
         return LON, LAT, temperature
+    
+    def detect_pressure_systems(self, lon_mesh, lat_mesh, pressure_field, min_intensity=5):
+        """
+        Detecta sistemas de pressão usando análise de extremos locais
+        """
+        # Aplicar filtro gaussiano para suavizar
+        smoothed_pressure = ndimage.gaussian_filter(pressure_field, sigma=1.5)
+
+        # Detectar máximos locais (alta pressão)
+        local_maxima = ndimage.maximum_filter(smoothed_pressure, size=5) == smoothed_pressure
+        high_pressure_mask = smoothed_pressure > (np.nanmean(smoothed_pressure) + min_intensity)
+        highs = local_maxima & high_pressure_mask
+
+        # Detectar minimos locais (baixa pressão)
+        local_minima = ndimage.minimum_filter(smoothed_pressure, size=5) == smoothed_pressure
+        low_pressure_mask = smoothed_pressure < (np.nanmean(smoothed_pressure) - min_intensity)
+        lows = local_minima & low_pressure_mask
+
+        systems = []
+
+        # Processar sistemas de alta pressão
+        high_indices = np.where(highs)
+        for i, j in zip(high_indices[0], high_indices[1]):
+            if not np.isnan(pressure_field[i, j]):
+                systems.append({
+                    'type': 'HIGH',
+                    'lat': lat_mesh[i, j],
+                    'lon': lon_mesh[i, j],
+                    'pressure': pressure_field[i, j],
+                    'intensity': pressure_field[i, j] - np.nanmean(pressure_field),
+                    'timestamp': datetime.now()
+
+                })
+        # Processar sistemas de baixa pressão
+        low_indices = np.where(lows)
+        for i, j in zip(low_indices[0], low_indices[1]):
+            if not np.isnan(pressure_field[i, j]):
+                systems.append({
+                    'type': 'LOW',
+                    'lat': lat_mesh[i, j],
+                    'lon': lon_mesh[i, j],
+                    'pressure': pressure_field[i, j],
+                    'intensity': pressure_field[i, j] - np.nanmean(pressure_field),
+                    'timestamp': datetime.now()
+                })
+
+        return systems
 
         
