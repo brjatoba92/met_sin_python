@@ -85,3 +85,30 @@ class SynopticMeteorologyAnalyzer:
                 })
         
         return pd.DataFrame(weather_data)
+    
+    
+    def interpolate_field(self, df, field, grid_size=50):
+        """
+        Interpola dados meteorológicos em uma grade regular
+        """
+        # limites de grade - Brasil
+        lon_min, lon_max = -75, -30
+        lat_min, lat_max = -35, 10
+
+        # Criar grade regular
+        lon_grid = np.linspace(lon_min, lon_max, grid_size)
+        lat_grid = np.linspace(lat_min, lat_max, grid_size)
+        lon_mesh, lat_mesh = np.meshgrid(lon_grid, lat_grid)
+
+        # Interpolar dados
+        points = df[['lon', 'lat']].values
+        values = df[field].values
+
+        interpolated = griddata(
+            points, values, 
+            (lon_mesh, lat_mesh), 
+            method='linear',
+            fill_value=np.nan
+        )
+
+        return lon_mesh, lat_mesh, interpolated
