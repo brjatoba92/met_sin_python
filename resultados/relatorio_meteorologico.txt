@@ -1,0 +1,201 @@
+RELAÓRIO METEORÓLOGICO - 2025-06-18 16:53:45
+============================================================
+
+CONDIÇÕES GERAIS: 
+Temperatura Média: 26.1 °C
+Pressão Média: 1015.0 hPa
+Umidade Média: 71.6 %
+Velocidade do Vento Média: 5.5 m/s
+
+SISTEMAS DE PRESSÃO IDENTIFICADOS: 9
+1. ALTA PRESSÃO
+ Localização: -16.63°S, 49.29°W
+ Pressão central: 1027.2 hPa
+2. ALTA PRESSÃO
+ Localização: -15.71°S, 39.18°W
+ Pressão central: 1038.1 hPa
+3. ALTA PRESSÃO
+ Localização: -12.96°S, 39.18°W
+ Pressão central: 1042.7 hPa
+4. ALTA PRESSÃO
+ Localização: -1.94°S, 44.69°W
+ Pressão central: 1029.1 hPa
+5. ALTA PRESSÃO
+ Localização: -0.10°S, 51.12°W
+ Pressão central: 1037.6 hPa
+6. ALTA PRESSÃO
+ Localização: 0.82°S, 53.88°W
+ Pressão central: 1036.6 hPa
+7. ALTA PRESSÃO
+ Localização: 1.73°S, 57.55°W
+ Pressão central: 1034.2 hPa
+8. BAIXA PRESSÃO
+ Localização: -23.06°S, 46.53°W
+ Pressão central: 977.6 hPa
+9. BAIXA PRESSÃO
+ Localização: -15.71°S, 55.71°W
+ Pressão central: 986.9 hPa
+
+CONDICOES POR REGIAO: 
+
+São Paulo:
+ Temperatura: 32.3 °C
+ Pressão: 975.2 hPa
+ Umidade: 107.9 %
+ Vento: 2.8 m/s, 345.5°
+
+Rio de Janeiro:
+ Temperatura: 46.0 °C
+ Pressão: 1012.7 hPa
+ Umidade: 103.7 %
+ Vento: 5.1 m/s, 56.7°
+
+Brasília:
+ Temperatura: 31.0 °C
+ Pressão: 1024.5 hPa
+ Umidade: 77.8 %
+ Vento: 10.2 m/s, 26.1°
+
+Salvador:
+ Temperatura: 16.6 °C
+ Pressão: 1044.4 hPa
+ Umidade: 89.5 %
+ Vento: 8.8 m/s, 187.9°
+
+Fortaleza:
+ Temperatura: 28.6 °C
+ Pressão: 1024.8 hPa
+ Umidade: 107.3 %
+ Vento: 7.7 m/s, 315.2°
+
+Manaus:
+ Temperatura: 31.2 °C
+ Pressão: 1008.5 hPa
+ Umidade: 65.6 %
+ Vento: 5.0 m/s, 180.4°
+
+Porto Alegre:
+ Temperatura: 33.4 °C
+ Pressão: 1035.6 hPa
+ Umidade: 64.7 %
+ Vento: 0.1 m/s, 308.3°
+
+Curitiba:
+ Temperatura: 21.3 °C
+ Pressão: 1023.4 hPa
+ Umidade: 49.3 %
+ Vento: 6.7 m/s, 220.9°
+
+Recife:
+ Temperatura: 13.4 °C
+ Pressão: 1010.6 hPa
+ Umidade: 65.6 %
+ Vento: 7.1 m/s, 203.4°
+
+Belém:
+ Temperatura: 14.4 °C
+ Pressão: 1006.9 hPa
+ Umidade: 79.8 %
+ Vento: 6.0 m/s, 27.3°
+
+Belo Horizonte:
+ Temperatura: 19.7 °C
+ Pressão: 984.3 hPa
+ Umidade: 24.9 %
+ Vento: 4.0 m/s, 108.6°
+
+Boa Vista:
+ Temperatura: 26.4 °C
+ Pressão: 1033.6 hPa
+ Umidade: 93.1 %
+ Vento: 9.9 m/s, 193.7°
+
+Florianópolis:
+ Temperatura: 33.5 °C
+ Pressão: 1036.0 hPa
+ Umidade: 37.9 %
+ Vento: 5.8 m/s, 351.4°
+
+Porto Velho:
+ Temperatura: 32.1 °C
+ Pressão: 1029.4 hPa
+ Umidade: 93.3 %
+ Vento: 6.1 m/s, 60.7°
+
+João Pessoa:
+ Temperatura: 27.7 °C
+ Pressão: 984.3 hPa
+ Umidade: 56.9 %
+ Vento: 2.0 m/s, 253.8°
+
+Teresina:
+ Temperatura: 20.9 °C
+ Pressão: 1000.2 hPa
+ Umidade: 107.8 %
+ Vento: 5.8 m/s, 266.3°
+
+Aracaju:
+ Temperatura: 21.5 °C
+ Pressão: 1025.1 hPa
+ Umidade: 93.4 %
+ Vento: 4.3 m/s, 214.7°
+
+Campo Grande:
+ Temperatura: 21.6 °C
+ Pressão: 1008.8 hPa
+ Umidade: 64.3 %
+ Vento: 4.4 m/s, 40.8°
+
+Cuiabá:
+ Temperatura: 37.4 °C
+ Pressão: 984.3 hPa
+ Umidade: 33.8 %
+ Vento: 7.8 m/s, 27.3°
+
+Goiânia:
+ Temperatura: 26.9 °C
+ Pressão: 1027.5 hPa
+ Umidade: 56.6 %
+ Vento: 4.5 m/s, 14.5°
+
+Macapá:
+ Temperatura: 23.0 °C
+ Pressão: 1038.1 hPa
+ Umidade: 85.1 %
+ Vento: 6.7 m/s, 227.0°
+
+Maceió:
+ Temperatura: 37.4 °C
+ Pressão: 1006.7 hPa
+ Umidade: 29.5 %
+ Vento: 11.6 m/s, 187.5°
+
+Natal:
+ Temperatura: 12.4 °C
+ Pressão: 1017.7 hPa
+ Umidade: 77.1 %
+ Vento: 3.0 m/s, 44.5°
+
+Palmas:
+ Temperatura: 25.1 °C
+ Pressão: 1017.3 hPa
+ Umidade: 43.4 %
+ Vento: -1.8 m/s, 349.9°
+
+Rio Branco:
+ Temperatura: 26.7 °C
+ Pressão: 1005.2 hPa
+ Umidade: 85.6 %
+ Vento: 6.0 m/s, 311.6°
+
+São Luís:
+ Temperatura: 20.9 °C
+ Pressão: 1012.3 hPa
+ Umidade: 65.7 %
+ Vento: 3.8 m/s, 0.0°
+
+Vitória:
+ Temperatura: 24.6 °C
+ Pressão: 1027.8 hPa
+ Umidade: 72.9 %
+ Vento: 5.8 m/s, 92.9°
