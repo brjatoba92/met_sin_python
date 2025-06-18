@@ -49,7 +49,35 @@ class WeatherSystemTracker:
         pressure += anticyclone_intensity
 
         # Adicionar ruído realistico
-        noise = np.random.normal(0, 2, pressure.shape)
+        noise = np.random.normal(0, 2, pressure.shape) # Distribuição normal com media 0 e desvio padrão 2
         pressure += noise
 
         return LON, LAT, pressure
+    
+    def generate_synthetic_temperature_field(self, time_step=0):
+        """
+        Gera campo de temperatura sintético
+        """
+        lon = np.linspace(-75, -30, 100)
+        lat = np.linspace(-35, 10, 80)
+        LON, LAT = np.meshgrid(lon, lat)
+
+        # Gradiente latitudinal de temperatura
+        temperature = 25 - 0.7 * LAT
+
+        # Frente fria em movimento
+        front_position = -60 + 3 * time_step
+        front_gradient = 10 / (1 + np.exp((LON - front_position) * 0.3))
+        temperature -= front_gradient
+
+        # Variabilidade espacial
+        temp_variation = 3 *  np.sin(np.radians(LON * 2) * np.cos(np.radians(LAT * 1.5)))
+        temperature += temp_variation
+
+        # Ruido
+        noise = np.random.normal(0, 1, temperature.shape)
+        temperature += noise
+
+        return LON, LAT, temperature
+
+        
