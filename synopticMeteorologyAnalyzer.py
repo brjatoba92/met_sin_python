@@ -112,3 +112,43 @@ class SynopticMeteorologyAnalyzer:
         )
 
         return lon_mesh, lat_mesh, interpolated
+    
+    def detect_pressure_centers(self, lon_mesh, lat_mesh, pressure_field):
+        """
+        Detecta centros de alta e baixa pressão
+        """
+        from scipy.ndimage import maximum_filter, minimum_filter
+
+        # Filtros para encontrar máximos e mínimos locais
+        max_filter = maximum_filter(pressure_field, size=5)
+        min_filter = minimum_filter(pressure_field, size=5)
+
+        # Identificar centros de alta pressão
+        high_centers = []
+        highs = (pressure_field == max_filter) & (pressure_field > np.nanmean(pressure_field) + np.nanstd(pressure_field))
+        high_indices = np.where(highs)
+
+        for i, j in zip(high_indices[0], high_indices[1]):
+            if not np.isnan(pressure_field[i, j]):
+                high_centers.append({
+                    'type': 'HIGH',
+                    'lat': lat_mesh[i, j],
+                    'lon': lon_mesh[i, j],
+                    'pressure': pressure_field[i, j]
+                })
+        
+        # Identificar centros de baixa pressão
+        low_centers = []
+        lows = (pressure_field == min_filter) & (pressure_field < np.nanmean(pressure_field) - np.nanstd(pressure_field))
+        low_indices = np.where(lows)
+
+        for i, j in zip(low_indices[0], low_indices[1]):
+            if not np.isnan(pressure_field[i, j]):
+                low_centers.append({
+                    'type': 'LOW',
+                    'lat': lat_mesh[i, j],
+                    'lon': lon_mesh[i, j],
+                    'pressure': pressure_field[i, j]
+                })
+        
+        return high_centers + low_centers
