@@ -126,5 +126,49 @@ class WeatherSystemTracker:
                 })
 
         return systems
+    
+    def detect_fronts(self, lon_mesh, lat_mesh, temperature_field, threshold=2):
+        """
+        Detecta frentes meteorológicas usando gradientes de temperatura
+        """
+        # Calcular gradientes de temperatura
+        grad_y, grad_x = np.gradient(temperature_field)
+        grad_magnitude = np.sqrt(grad_x ** 2 + grad_y ** 2)
 
-        
+        # Encontrar regiões com gradientes altos
+        front_mask = grad_magnitude > threshold
+
+        # Usar clustering para agrupar pontos de frente
+        if np.any(front_mask):
+            front_points = np.column_stack(np.where(front_mask))
+
+            if len(front_points) > 5:
+                # Aplicar DBSCAN para agrupar pontos próximos
+                clustering = DBSCAN(eps=3, min_samples=5).fit(front_points)
+
+                fronts = []
+                for cluster_id in set(clustering.labels_):
+                    if cluster_id != 1: # ignorar ruido
+                        cluster_points = front_points[clustering.labels_ == cluster_id]
+
+                        # Calcular centroide da frent
+                        center_i = int(np.mean(cluster_points[:, 0]))
+                        center_j = int(np.mean(cluster_points[:, 1]))
+
+                        # Determinar tipo de frente baseado no gradiente
+                        local_grad_x = grad_x[center_i, center_j]
+                        local_grad_y = grad_y[center_i, center_j]
+
+                        front_type = 'COLD' if local_grad_x < 0 else 'WARM'
+
+                        fronts.append({
+                            'type': front_type,
+                            'lat': lat_mesh[center_i, center_j],
+                            'lon': lon_mesh[center_i, center_j],
+                            'intensity': grad_magnitude[center_i, center_j],
+                            'direction': np.degrees(np.arctan2(local_grad_y, local_grad_x)),
+                            'points': [(lat_mesh[i, j], lon_mesh[i, j]) for i, j in cluster_points],
+                            'timestamp': datetime.now()
+                        })
+
+        return fronts
