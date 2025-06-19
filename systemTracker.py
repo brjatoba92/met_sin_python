@@ -293,3 +293,89 @@ class WeatherSystemTracker:
                 })
 
         return alerts
+    
+    def visualize_tracking(self, lon_mesh, lat_mesh, pressure_field, systems, save_path=None):
+        """
+        Visualiza sistemas detectados e suas trajetórias
+        """
+
+        fig = plt.figure(figsize=(16, 12))
+        ax = plt.axes(projection=ccrs.PlateCarree())
+        ax.set_extent([-75, -30, -35, 10], crs=ccrs.PlateCarree())
+
+        # Caracteristicas geograficas
+        ax.add_feature(cfeature.COASTLINE)
+        ax.add_feature(cfeature.BORDERS)
+        ax.add_feature(cfeature.STATES, alpha=0.3)
+        ax.add_feature(cfeature.OCEAN, color='lightblue', alpha=0.3)
+        ax.add_feature(cfeature.LAND, color='lightgray', alpha=0.3)
+
+        # Campo de pressão
+        contours = ax.contour(
+            lon_mesh, lat_mesh, pressure_field,
+            levels=np.arange(980, 1040, 4),
+            colors='black',
+            linewidths=0.8,
+            alpha=0.7,
+            transform=ccrs.PlateCarree()
+        )
+        ax.clabel(contours, inline=True, fontsize=8)
+
+        # Plotar sistemas e trajetorias
+        colors = {'HIGH': 'red', 'LOW': 'blue'}
+        markers = {'HIGH': '^', 'LOW': 'v'}
+
+        for system in systems:
+            color = colors[system['type']]
+            marker = markers[system['type']]
+
+            # Sistema atual
+            ax.plot(system['lon'], system['lat'], 
+                    marker=marker, color=color, markersize=12, 
+                    transform=ccrs.PlateCarree())
+            
+            # ID do sistema
+            ax.text(system['lon'] + 0.5, system['lat'] + 0.5,
+                    system['id'], fontsize=8, color=color,
+                    transform=ccrs.PlateCarree())
+            
+            # Trajetoria
+            if track in system and len(system['track']) > 1:
+                track = np.array(system['track'])
+                ax.plot(track[:, 1], track[:, 0], 
+                        color=color, linewidth=2, alpha=0.7, 
+                        transform=ccrs.PlateCarree())
+                
+                # Pontos da trajetoria
+                ax.scatter(track[:-1, 1], track[:-1, 0],
+                           color=color, s=20, alpha=0.5,
+                           transform=ccrs.PlateCarree())
+        
+            #Previsao trajetoria
+            future_track = self.predict_trajectory(system, hours_ahead=12)
+            if future_track:
+                future_array = np.array(future_track)
+                ax.plot(future_array[:, 1], future_array[:, 0], 
+                    color=color, linewidth=2, linestyle='--', alpha=0.5, 
+                    transform=ccrs.PlateCarree())
+        ax.gridlines(draw_labels=True, alpha=0.5)
+        plt.title(f'Rastreamento de Sistemas Meteorológicos - {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}',
+                  fontsize=14, fontweight='bold')
+        
+        # Legenda
+        legend_elements = [
+            plt.Line2D([0], [0], marker='^', color='w', label='Alta Pressão', markerfacecolor='red', markersize=10),
+            plt.Line2D([0], [0], marker='v', color='w', label='Baixa Pressão', markerfacecolor='blue', markersize=10)
+            plt.Line2D([0], [0], color='gray', label='Trajetória', linewidth=2),
+            plt.Line2D([0], [0], color='gray', label='Previsão', linewidth=2, linestyle='--')
+        ]
+
+        ax.legend(handles=legend_elements, loc='upper right', fontsize=10)
+
+        plt.tight_layout()
+
+        if save_path:
+            plt.savefig(save_path)
+           
+        return fig
+    
