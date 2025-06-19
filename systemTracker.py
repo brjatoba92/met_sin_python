@@ -260,4 +260,36 @@ class WeatherSystemTracker:
         return None
         
         
+    def generate_alerts(self, systems):
+        """
+        Gera alertas meteorológicos baseados na intensidade dos sistemas
+        """
+        alerts = []
+
+        for system in systems:
+            alert_level = None
+
+            if system['type'] == 'LOW':
+                if system['intensity'] > 20:
+                    alert_level = 'SEVERE'
+                elif system['intensity'] > 10:
+                    alert_level = 'MODERATE'
+                elif system['intensity'] > 5:
+                    alert_level = 'WATCH'
             
+            elif system['type'] == 'HIGH':
+                if system['intensity'] > 15:
+                    alert_level = 'WATCH'
+                
+
+            if alert_level:
+                alerts.append({
+                    'system_id': system['id'],
+                    'type': system['type'],
+                    'level': alert_level,
+                    'location': f"{system['lat']:.2f}°S, {system['lon']:.2f}°W",
+                    'intensity': system['intensity'],
+                    'timestamp': system['timestamp']
+                })
+
+        return alerts
