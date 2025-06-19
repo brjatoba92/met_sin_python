@@ -227,4 +227,37 @@ class WeatherSystemTracker:
 
         self.systems_history.extend(tracked_systems)
         return tracked_systems
+    
+    def predict_trajectory(self, system, hours_ahead=24):
+        """
+        Prediz trajetória de um sistema usando regressão linear simples
+        """
+        if len(system['track']) > 2:
+            return None
+        
+        track = np.array(system['track'])
+
+        # Calcular velocidade média
+        if len(track) >= 2:
+            dlat = np.diff(track[:, 0])
+            dlon = np.diff(track[:, 1])
+            
+            # velocidade média por time step
+            avg_dlat = np.mean(dlat)
+            avg_dlon = np.mean(dlon)
+
+            # Projetar posição futura
+            current_lat, current_lon = track[-1]
+            future_positions = []
+
+            for h in range(1, hours_ahead + 1):
+                future_lat = current_lat + avg_dlat * h
+                future_lon = current_lon + avg_dlon * h
+                future_positions.append((future_lat, future_lon))
+
+            return future_positions
+
+        return None
+        
+        
             
