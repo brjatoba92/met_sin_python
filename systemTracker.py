@@ -171,4 +171,60 @@ class WeatherSystemTracker:
                             'timestamp': datetime.now()
                         })
 
-        return fronts
+            return fronts
+        return []
+    def track_systems(self, new_systems, time_step):
+        """
+        Rastreia sistemas meteorológicos ao longo do tempo
+        """
+        if not self.systems_history or not new_systems:
+            # Adicionar IDs únicos aos novos sistemas
+            for i, system in enumerate(new_systems):
+                system['id'] = f"{system['type']}{time_step}_{i}"
+                system['track'] = [(system['lat'], system['lon'])]
+
+            self.systems_history.extend(new_systems)
+            return new_systems
+        
+        # Ultima detecção
+        last_systems = [s for s in self.systems_history if 'track' in s]
+
+        tracked_systems = []
+
+        for new_system in new_systems:
+            best_match = None
+            min_distance = float('inf')
+
+            # Encontrar o sistema mais proximo do mesmo tipo
+            for old_system in last_systems:
+                best_match = None
+                min_distance = float('inf')
+
+                # Encontrar o sistema mais proximo do mesmo tipo
+                for old_system in last_systems:
+                    if old_system['type'] == new_system['type']:
+                        # Calcular distância (aproximação simples)
+                        distance = np.sqrt(
+                            (new_system['lat'] - old_system['lat']) ** 2 +
+                            (new_system['lon'] - old_system['lon']) ** 2
+                        ) * 111 # Conversão aproximada para km
+
+                        if distance < self.tracking_threshold and distance < min_distance:
+                            best_match = old_system
+                            min_distance = distance
+                if best_match:
+                    # Sistema rastreado - atualizar trajetória
+                    new_system['id'] = f"{new_system['type']}{time_step}_{len(tracked_systems)}"
+                    new_system['track'] = best_match['track'] + [(new_system['lat'], new_system['lon'])]
+                    new_system['speed'] = min_distance # km entre detecções
+                else:
+                    # Novo sistema
+                    new_system['id'] = f"{new_system['type']}{time_step}_{len(tracked_systems)}"
+                    new_system['track'] = [(new_system['lat'], new_system['lon'])]
+                    new_system['speed'] = 0
+
+                tracked_systems.append(new_system)
+
+        self.systems_history.extend(tracked_systems)
+        return tracked_systems
+            
