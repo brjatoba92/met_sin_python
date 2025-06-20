@@ -145,7 +145,7 @@ CONDIÇÕES POR CIDADE:
 
 # **2 - Weather System Tracker**
 
-![Sistema de Rastreamento Meteorológico](tracking_step_00.png)
+![Sistema de Rastreamento Meteorológico](resultados_systemTracker/mapas/tracking_step_06.png)
 
 ## Descrição
 
