@@ -1,0 +1,16 @@
+ESTATÍSTICAS DE SISTEMAS METEOROLÓGICOS
+==================================================
+
+HIGH PRESSURE SYSTEMS:
+Total detectado: 10
+Intensidade média: 13.86 hPa
+Intensidade máxima: 21.04 hPa
+Sistemas rastreados: 5
+Velocidade média: 151.3 km/time_step
+
+LOW PRESSURE SYSTEMS:
+Total detectado: 8
+Intensidade média: 22.66 hPa
+Intensidade máxima: 27.26 hPa
+Sistemas rastreados: 4
+Velocidade média: 199.1 km/time_step
