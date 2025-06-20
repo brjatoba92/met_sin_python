@@ -379,3 +379,43 @@ class WeatherSystemTracker:
            
         return fig
     
+    def generate_tracking_report(self, systems, alerts):
+        """
+        Gera relatório de rastreamento
+        """
+        report = []
+        report.append(f"RELATÓRIO DE RASTREAMENTO - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        report.append("=" * 70)
+
+        # Resumo de sistemas
+        high_systems = [s for s in systems if s['type'] == 'HIGH']
+        low_systems = [s for s in systems if s['type'] == 'LOW']
+
+        report.append("\nRESUMO DE SISTEMAS:")
+        report.append(f"SISTEMAS DE ALTA PRESSÃO IDENTIFICADOS: {len(high_systems)}")
+        report.append(f"SISTEMAS DE BAIXA PRESSÃO IDENTIFICADOS: {len(low_systems)}")
+
+        # Detalhes dos sistemas
+        for system in systems:
+            report.append(f"\n{system['id']} - {system['type']}")
+            report.append(f" Posição: {system['lat']:.2f}°S, {abs(system['lon']):.2f}°W")
+            report.append(f" Pressão: {system['pressure']:.1f} hPa")
+            report.append(f" Intensidade: {system['intensity']:.1f} hPa")
+
+            if 'speed' in system:
+                report.append(f" Velocidade: {system['speed']:.1f} km/h")
+            
+            if 'track' in system:
+                report.append(f" Pontos rastreados: {len(system['track'])}")
+        
+        # Alertas
+        if alerts:
+            report.append(f"\nALERTAS METEOROLOGICOS: {len(alerts)}")
+            for alert in alerts:
+                report.append(f"- {alert['level']}: {alert['type']} em {alert['location']}")
+                report.append(f" Intensidade: {alert['intensity']:.1f} hPa")
+        else:
+            report.append("\nNENHUM ALERTA ATIVO NO MOMENTO.")
+
+        return "\n".join(report)
+    
