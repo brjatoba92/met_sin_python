@@ -13,7 +13,7 @@ from tensorflow import keras
 from tensorflow.keras import layers
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
-import datetime import datetime, timedelta
+from datetime import datetime, timedelta
 import joblib
 import json
 import warnings
@@ -114,7 +114,7 @@ class SynopticMLForecast:
                     'dewpoint': dewpoint,
                     'heat_index': heat_index,
                     'gradient_pressure': gradient_pressure,
-                    'vorticity': vorticity
+                    'vorticity': vorticity,
                     # targets (proximos 3 dias)
                     'temp_1d': temperature + np.random.normal(0, 1),
                     'temp_3d': temperature + np.random.normal(0, 2),
@@ -125,6 +125,45 @@ class SynopticMLForecast:
                 })
 
         return pd.DataFrame(data)
+    
+    def calculate_heat_index(self, temp, humidity):
+        """
+        Calcula índice de calor
+        """
+        if temp < 27:
+            return temp
+        
+        hi = (0.5 * (temp + 61 + ((temp - 68) * 1.2) + (humidity * 0.094)))
+
+        if hi > 79:
+            hi = (-42.379 + 2.04901523 * temp + 10.14333127 * humidity - 
+                0.22475541 * temp * humidity - 6.83783e-3 * temp**2 - 
+                5.481717e-2 * humidity**2 + 1.22874e-3 * temp**2 * humidity + 
+                8.5282e-4 * temp * humidity**2 - 1.99e-6 * temp**2 * humidity**2)
+
+        return hi
+    
+    def create_features(self, df):
+        """
+        Cria features para modelos de ML
+        """
+        df_features = df.copy()
+
+        # Features temporais
+        df_features['sin_day'] = np.sin(2 * np.pi * df_features['day_of_year'] / 365)
+        df_features['cos_day'] = np.cos(2 * np.pi * df_features['day_of_year'] / 365)
+
+        # Features de localização
+        df_features['lat_sin'] = np.sin(np.radians(df_features['lat']))
+        df_features['lon_sin'] = np.sin(np.radians(df_features['lon']))
+
+        # Features de interação
+        df_features['temp_humidity'] = df_features['temperature'] * df_features['humidity']
+        df_features['pressure_gradient_abs'] = np.abs(df_features['gradient_pressure'])
+
+        # Log features
+
+        return df_features
 
 
                 
