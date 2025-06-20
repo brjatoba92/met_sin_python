@@ -462,3 +462,33 @@ def run_tracking_simulation(tracker, time_steps=10, save_plots=True):
         print(f"Detectados {len(tracked_systems)} sistemas meteorológicos")
 
     return all_reports
+
+def analyze_system_statistics(tracker):
+    """
+    Analisa estatísticas dos sistemas rastreados
+    """
+    if not tracker.systems_history:
+        return "Nenhum sistema rastreado ainda."
+    
+    df = pd.DataFrame(tracker.systems_history)
+    
+    stats = []
+    stats.append("ESTATÍSTICAS DE SISTEMAS METEOROLÓGICOS")
+    stats.append("=" * 50)
+
+    # Estatisticas por tipo
+    for system_type in df['type'].unique():
+        type_data = df[df['type'] == system_type]
+        stats.append(f"\n{system_type.upper()} PRESSURE SYSTEMS:")
+        stats.append(f"Quantidade: {len(type_data)}")
+        stats.append(f"Intensidade: {type_data['intensity'].mean():.2f} hPa")
+        stats.append(f"Intensidade Máxima: {type_data['intensity'].max():.2f} hPa")
+
+        # Sistemas com trajetorias
+        tracked = type_data[type_data['track'].apply(lambda x: len(x) > 1 if isinstance(x, list) else False)]
+        if len(tracked)>0:
+            stats.append(f"Sistemas rastreados: {len(tracked)}")
+            avg_speed = tracked['speed'].mean() if 'speed' in tracked.columns else 0
+            stats.append(f"Velocidade Média: {avg_speed:.1f} km/time_step")
+
+    return "\n".join(stats)
