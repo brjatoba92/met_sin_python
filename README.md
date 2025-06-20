@@ -1,4 +1,6 @@
-# **Synoptic Meteorology Analyzer**  
+# Aplicações Python em Meteorologia Sinótica
+
+# ** 1 - Synoptic Meteorology Analyzer**  
 
 ## **📌 Visão Geral**  
 
@@ -141,16 +143,169 @@ CONDIÇÕES POR CIDADE:
 
 ---
 
+# **2 - Weather System Tracker**
+
+![Sistema de Rastreamento Meteorológico](tracking_step_00.png)
+
+## Descrição
+
+O Weather System Tracker é um sistema de detecção e rastreamento de sistemas meteorológicos que utiliza técnicas de processamento de dados e aprendizado de máquina para identificar e monitorar sistemas de alta e baixa pressão, bem como frentes meteorológicas.
+
+---
+
+## Funcionalidades Principais
+
+- **Geração de campos meteorológicos sintéticos**:
+  - Campos de pressão atmosférica simulando ciclones e anticiclones
+  - Campos de temperatura com frentes frias e quentes
+
+- **Detecção de sistemas meteorológicos**:
+  - Identificação de sistemas de alta e baixa pressão
+  - Detecção de frentes meteorológicas usando gradientes de temperatura
+  - Clusterização de pontos de frente usando DBSCAN
+
+- **Rastreamento temporal**:
+  - Associação de sistemas entre passos de tempo
+  - Cálculo de trajetórias e velocidades
+  - Previsão de trajetórias futuras
+
+- **Geração de alertas**:
+  - Classificação de intensidade (WATCH, MODERATE, SEVERE)
+  - Relatórios detalhados de sistemas
+
+- **Visualização**:
+  - Mapas com projeção cartográfica
+  - Trajetórias e previsões plotadas
+  - Campos de pressão com curvas de nível
+
+---
+
+## Requisitos
+
+- Python 3.7+
+- Bibliotecas necessárias:
+  - numpy
+  - pandas
+  - matplotlib
+  - cartopy
+  - scipy
+  - scikit-learn
+
+Instale as dependências com:
+```bash
+pip install numpy pandas matplotlib cartopy scipy scikit-learn
+```
+
+---
+
+## Como Usar
+
+1. **Inicialização**:
+```python
+tracker = WeatherSystemTracker()
+```
+
+2. **Geração de dados sintéticos**:
+```python
+lon_mesh, lat_mesh, pressure_field = tracker.generate_synthetic_pressure_field(time_step)
+```
+
+3. **Detecção de sistemas**:
+```python
+systems = tracker.detect_pressure_systems(lon_mesh, lat_mesh, pressure_field)
+fronts = tracker.detect_fronts(lon_mesh, lat_mesh, temperature_field)
+```
+
+4. **Rastreamento**:
+```python
+tracked_systems = tracker.track_systems(systems, time_step)
+```
+
+5. **Visualização**:
+```python
+fig = tracker.visualize_tracking(lon_mesh, lat_mesh, pressure_field, tracked_systems)
+```
+
+6. **Relatórios**:
+```python
+report = tracker.generate_tracking_report(tracked_systems, alerts)
+```
+
+---
+
+## Exemplo Completo
+
+O arquivo principal inclui uma simulação completa que:
+1. Gera 8 passos de tempo de dados sintéticos
+2. Detecta e rastreia sistemas meteorológicos
+3. Gera relatórios e gráficos
+4. Produz estatísticas finais
+
+Para executar a simulação completa:
+```bash
+python weather_tracker.py
+```
+
+---
+
+## Saídas Geradas
+
+- **tracking_step_XX.png**: Gráficos de rastreamento em cada passo de tempo
+- **relatorios_rastreamento.txt**: Relatórios detalhados de cada passo
+- **estatisticas_sistemas.txt**: Análise estatística final
+
+---
+
+## Métodos Principais
+
+| Método | Descrição |
+|--------|-----------|
+| `generate_synthetic_pressure_field` | Gera campo de pressão com sistemas móveis |
+| `generate_synthetic_temperature_field` | Gera campo de temperatura com frentes |
+| `detect_pressure_systems` | Identifica altas e baixas pressões |
+| `detect_fronts` | Detecta frentes usando gradientes térmicos |
+| `track_systems` | Associa sistemas entre passos de tempo |
+| `predict_trajectory` | Prevê trajetórias futuras |
+| `generate_alerts` | Gera alertas baseados em intensidade |
+| `visualize_tracking` | Plota mapas com sistemas e trajetórias |
+| `generate_tracking_report` | Produz relatório textual |
+
+## Estrutura de Dados
+
+Os sistemas meteorológicos são representados como dicionários com:
+- `type`: 'HIGH' ou 'LOW'
+- `lat`, `lon`: Coordenadas
+- `pressure`: Valor de pressão
+- `intensity`: Intensidade relativa
+- `track`: Histórico de posições
+- `id`: Identificador único
+
+---
+
+## Personalização
+
+Parâmetros ajustáveis:
+- `tracking_threshold`: Distância máxima para associação (km)
+- Limiares de detecção em `detect_pressure_systems` e `detect_fronts`
+- Parâmetros de visualização em `visualize_tracking`
+
+---
+
+## Limitações
+
+- Dados sintéticos simplificados
+- Modelo de previsão de trajetória básico
+- Região fixa (América do Sul)
+
+
+---
+
 ## **📜 Licença**  
 Este projeto é open-source (MIT). Sinta-se à vontade para **contribuir, modificar e distribuir**!  
 
-🔗 **GitHub**: [SeuRepositório](https://github.com/brjatoba92/met_sin_python)  
+🔗 **GitHub**: [MeuRepositório](https://github.com/brjatoba92/met_sin_python)  
 📧 **Contato**: [E-mail](brunojatobadev@gmail.com)  
 
 --- 
 
 **🌟 Dúvidas? Sugestões? Abra uma *issue* ou contribua!**
-
----
-
-# Detecção e Reastreador de Sistemas Meteorológicos
