@@ -365,7 +365,7 @@ class WeatherSystemTracker:
         # Legenda
         legend_elements = [
             plt.Line2D([0], [0], marker='^', color='w', label='Alta Pressão', markerfacecolor='red', markersize=10),
-            plt.Line2D([0], [0], marker='v', color='w', label='Baixa Pressão', markerfacecolor='blue', markersize=10)
+            plt.Line2D([0], [0], marker='v', color='w', label='Baixa Pressão', markerfacecolor='blue', markersize=10),
             plt.Line2D([0], [0], color='gray', label='Trajetória', linewidth=2),
             plt.Line2D([0], [0], color='gray', label='Previsão', linewidth=2, linestyle='--')
         ]
@@ -418,4 +418,47 @@ class WeatherSystemTracker:
             report.append("\nNENHUM ALERTA ATIVO NO MOMENTO.")
 
         return "\n".join(report)
-    
+
+def run_tracking_simulation(tracker, time_steps=10, save_plots=True):
+    """
+    Executa simulação de rastreamento ao longo do tempo
+    """
+    print("Iniciando simulação de rastreamento...")
+
+    all_reports = []
+
+    for step in range(time_steps):
+        print(f"\nProcessando time step {step + 1}/{time_steps}...")
+
+        # Gerar dados sinteticos
+        lon_mesh, lat_mesh, pressure_field = tracker.generate_synthetic_pressure_field(step)
+        temp_lon, temp_lat, temp_field = tracker.generate_synthetic_temperature_field(step)
+
+        # Detectar sistemas
+        systems = tracker.detect_pressure_systems(lon_mesh, lat_mesh, pressure_field)
+        fronts = tracker.detect_fronts(temp_lon, temp_lat, temp_field)
+
+        # Rastrear sistemas
+        tracked_systems = tracker.track_systems(systems, step)
+
+        # Gerar alertas
+        alerts = tracker.generate_alerts(tracked_systems)
+
+        # Visualizar (apenas alguns time steps para economizar recursos)
+        if save_plots and step % 3 == 0:
+            fig = tracker.visualize_tracking(
+                lon_mesh, lat_mesh, pressure_field, tracked_systems,
+                save_path=f"tracking_step_{step:02d}.png"
+            )
+            plt.close(fig)
+        
+        # Gerar relatorio
+        report = tracker.generate_tracking_report(tracked_systems, alerts)
+        all_reports.append(report)
+
+        if alerts:
+            print(f"⚠️  {len(alerts)} alertas gerados!")
+        
+        print(f"Detectados {len(tracked_systems)} sistemas meteorológicos")
+
+    return all_reports
