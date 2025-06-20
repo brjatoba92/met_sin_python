@@ -1,0 +1,252 @@
+
+==================================================
+TIME STEP 1
+==================================================
+RELATÓRIO DE RASTREAMENTO - 20/06/2025 12:23
+======================================================================
+
+SISTEMAS DETECTADOS:
+Sistemas de Alta Pressão: 1
+Sistemas de Baixa Pressão: 1
+
+HIGH_0_0 - HIGH
+  Posição: -24.18°S, 39.55°W
+  Pressão: 1029.1 hPa
+  Intensidade: 18.2 hPa
+  Pontos rastreados: 1
+
+LOW_0_1 - LOW
+  Posição: -20.19°S, 51.36°W
+  Pressão: 986.3 hPa
+  Intensidade: 24.6 hPa
+  Pontos rastreados: 1
+
+ALERTAS METEOROLÓGICOS (2):
+- WATCH: HIGH em -24.18°S, 39.55°W
+  Intensidade: 18.2 hPa
+- SEVERE: LOW em -20.19°S, 51.36°W
+  Intensidade: 24.6 hPa
+
+
+==================================================
+TIME STEP 2
+==================================================
+RELATÓRIO DE RASTREAMENTO - 20/06/2025 12:23
+======================================================================
+
+SISTEMAS DETECTADOS:
+Sistemas de Alta Pressão: 2
+Sistemas de Baixa Pressão: 1
+
+HIGH_0_0 - HIGH
+  Posição: -24.75°S, 39.55°W
+  Pressão: 1024.8 hPa
+  Intensidade: 13.9 hPa
+  Velocidade: 63.2 km/h
+  Pontos rastreados: 2
+
+HIGH_1_1 - HIGH
+  Posição: 10.00°S, 36.82°W
+  Pressão: 1019.0 hPa
+  Intensidade: 8.0 hPa
+  Velocidade: 0.0 km/h
+  Pontos rastreados: 1
+
+LOW_0_1 - LOW
+  Posição: -19.05°S, 49.09°W
+  Pressão: 990.6 hPa
+  Intensidade: 20.3 hPa
+  Velocidade: 282.2 km/h
+  Pontos rastreados: 2
+
+ALERTAS METEOROLÓGICOS (1):
+- SEVERE: LOW em -19.05°S, 49.09°W
+  Intensidade: 20.3 hPa
+
+
+==================================================
+TIME STEP 3
+==================================================
+RELATÓRIO DE RASTREAMENTO - 20/06/2025 12:23
+======================================================================
+
+SISTEMAS DETECTADOS:
+Sistemas de Alta Pressão: 2
+Sistemas de Baixa Pressão: 1
+
+HIGH_0_0 - HIGH
+  Posição: -26.46°S, 41.36°W
+  Pressão: 1023.8 hPa
+  Intensidade: 12.8 hPa
+  Velocidade: 277.0 km/h
+  Pontos rastreados: 3
+
+HIGH_2_1 - HIGH
+  Posição: 10.00°S, 68.64°W
+  Pressão: 1018.1 hPa
+  Intensidade: 7.1 hPa
+  Velocidade: 0.0 km/h
+  Pontos rastreados: 1
+
+LOW_2_2 - LOW
+  Posição: -17.34°S, 46.82°W
+  Pressão: 987.0 hPa
+  Intensidade: 23.9 hPa
+  Velocidade: 0.0 km/h
+  Pontos rastreados: 1
+
+ALERTAS METEOROLÓGICOS (1):
+- SEVERE: LOW em -17.34°S, 46.82°W
+  Intensidade: 23.9 hPa
+
+
+==================================================
+TIME STEP 4
+==================================================
+RELATÓRIO DE RASTREAMENTO - 20/06/2025 12:23
+======================================================================
+
+SISTEMAS DETECTADOS:
+Sistemas de Alta Pressão: 1
+Sistemas de Baixa Pressão: 1
+
+HIGH_3_0 - HIGH
+  Posição: -27.03°S, 45.45°W
+  Pressão: 1020.4 hPa
+  Intensidade: 9.4 hPa
+  Velocidade: 0.0 km/h
+  Pontos rastreados: 1
+
+LOW_3_1 - LOW
+  Posição: -16.20°S, 44.09°W
+  Pressão: 991.1 hPa
+  Intensidade: 19.9 hPa
+  Velocidade: 0.0 km/h
+  Pontos rastreados: 1
+
+ALERTAS METEOROLÓGICOS (1):
+- MODERATE: LOW em -16.20°S, 44.09°W
+  Intensidade: 19.9 hPa
+
+
+==================================================
+TIME STEP 5
+==================================================
+RELATÓRIO DE RASTREAMENTO - 20/06/2025 12:23
+======================================================================
+
+SISTEMAS DETECTADOS:
+Sistemas de Alta Pressão: 1
+Sistemas de Baixa Pressão: 1
+
+HIGH_3_0 - HIGH
+  Posição: -27.03°S, 46.82°W
+  Pressão: 1025.4 hPa
+  Intensidade: 14.4 hPa
+  Velocidade: 151.4 km/h
+  Pontos rastreados: 2
+
+LOW_4_1 - LOW
+  Posição: -17.34°S, 40.91°W
+  Pressão: 991.3 hPa
+  Intensidade: 19.7 hPa
+  Velocidade: 0.0 km/h
+  Pontos rastreados: 1
+
+ALERTAS METEOROLÓGICOS (1):
+- MODERATE: LOW em -17.34°S, 40.91°W
+  Intensidade: 19.7 hPa
+
+
+==================================================
+TIME STEP 6
+==================================================
+RELATÓRIO DE RASTREAMENTO - 20/06/2025 12:23
+======================================================================
+
+SISTEMAS DETECTADOS:
+Sistemas de Alta Pressão: 1
+Sistemas de Baixa Pressão: 1
+
+HIGH_5_0 - HIGH
+  Posição: -23.61°S, 48.64°W
+  Pressão: 1029.2 hPa
+  Intensidade: 18.2 hPa
+  Velocidade: 0.0 km/h
+  Pontos rastreados: 1
+
+LOW_4_1 - LOW
+  Posição: -17.34°S, 39.09°W
+  Pressão: 989.7 hPa
+  Intensidade: 21.4 hPa
+  Velocidade: 201.8 km/h
+  Pontos rastreados: 2
+
+ALERTAS METEOROLÓGICOS (2):
+- WATCH: HIGH em -23.61°S, 48.64°W
+  Intensidade: 18.2 hPa
+- SEVERE: LOW em -17.34°S, 39.09°W
+  Intensidade: 21.4 hPa
+
+
+==================================================
+TIME STEP 7
+==================================================
+RELATÓRIO DE RASTREAMENTO - 20/06/2025 12:23
+======================================================================
+
+SISTEMAS DETECTADOS:
+Sistemas de Alta Pressão: 1
+Sistemas de Baixa Pressão: 1
+
+HIGH_5_0 - HIGH
+  Posição: -24.18°S, 48.64°W
+  Pressão: 1026.6 hPa
+  Intensidade: 15.5 hPa
+  Velocidade: 63.2 km/h
+  Pontos rastreados: 2
+
+LOW_4_1 - LOW
+  Posição: -16.77°S, 37.27°W
+  Pressão: 987.0 hPa
+  Intensidade: 24.1 hPa
+  Velocidade: 211.5 km/h
+  Pontos rastreados: 3
+
+ALERTAS METEOROLÓGICOS (2):
+- WATCH: HIGH em -24.18°S, 48.64°W
+  Intensidade: 15.5 hPa
+- SEVERE: LOW em -16.77°S, 37.27°W
+  Intensidade: 24.1 hPa
+
+
+==================================================
+TIME STEP 8
+==================================================
+RELATÓRIO DE RASTREAMENTO - 20/06/2025 12:23
+======================================================================
+
+SISTEMAS DETECTADOS:
+Sistemas de Alta Pressão: 1
+Sistemas de Baixa Pressão: 1
+
+HIGH_5_0 - HIGH
+  Posição: -23.61°S, 50.45°W
+  Pressão: 1032.2 hPa
+  Intensidade: 21.0 hPa
+  Velocidade: 201.8 km/h
+  Pontos rastreados: 2
+
+LOW_4_1 - LOW
+  Posição: -16.77°S, 36.36°W
+  Pressão: 983.9 hPa
+  Intensidade: 27.3 hPa
+  Velocidade: 100.9 km/h
+  Pontos rastreados: 4
+
+ALERTAS METEOROLÓGICOS (2):
+- WATCH: HIGH em -23.61°S, 50.45°W
+  Intensidade: 21.0 hPa
+- SEVERE: LOW em -16.77°S, 36.36°W
+  Intensidade: 27.3 hPa
+
