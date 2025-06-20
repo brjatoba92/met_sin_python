@@ -340,7 +340,7 @@ class WeatherSystemTracker:
                     transform=ccrs.PlateCarree())
             
             # Trajetoria
-            if track in system and len(system['track']) > 1:
+            if 'track' in system and len(system['track']) > 1:
                 track = np.array(system['track'])
                 ax.plot(track[:, 1], track[:, 0], 
                         color=color, linewidth=2, alpha=0.7, 
@@ -492,3 +492,33 @@ def analyze_system_statistics(tracker):
             stats.append(f"Velocidade Média: {avg_speed:.1f} km/time_step")
 
     return "\n".join(stats)
+
+# Exemplo de uso
+if __name__ == "__main__":
+    # Inicializa Tracker
+    tracker = WeatherSystemTracker()
+    
+    # Executar simulação
+    reports = run_tracking_simulation(tracker, time_steps=8, save_plots=True)
+
+    # Salvar relatorios
+    with open("relatorios_rastreamento.txt", "w", encoding="utf-8") as f:
+        for i, report in enumerate(reports):
+            f.write(f"\n{'='*50}\n")
+            f.write(f"Time Step {i+1}\n")
+            f.write(f"{'='*50}\n")
+            f.write(report)
+            f.write("\n\n")
+    
+    # Analise estatistica final
+    final_stats = analyze_system_statistics(tracker)
+    print("\n" + final_stats)
+
+    with open("estatisticas_sistemas.txt", "w", encoding="utf-8") as f:
+        f.write(final_stats)
+    
+    print(f"\nSimulação concluída! Gerados {len(reports)} relatórios.")
+    print("Arquivos salvos:")
+    print("- relatorios_rastreamento.txt")
+    print("- estatisticas_sistemas.txt")
+    print("- tracking_step_XX.png (gráficos)")
