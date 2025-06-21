@@ -164,6 +164,28 @@ class SynopticMLForecast:
         # Log features
 
         return df_features
+    
+    def prepare_lstm_data(self, df, sequence_lenght=7, target_col='temp_1d'):
+        """
+        Prepara dados para modelo LSTM
+        """
+        sequences = []
+        targets = []
+
+        features_cols = ['temperature', 'pressure', 'humidity', 'precipitation', 'wind_speed', 'enso_index', 'nao_index', 'sin_day', 'cos_day']
+
+        for location in df['location_id'].unique():
+            location_data = df[df['location_id'] == location].sort_values('date')
+
+            for i in range(len(location_data) - sequence_lenght):
+                seq = location_data[feature_cols].iloc[i:i+sequence_length].values
+                target = location_data[target_col].iloc[i+sequence_length]
+
+                sequences.append(seq)
+                targets.append(target)
+
+        return np.array(sequences), np.array(targets)
+        
 
 
                 
