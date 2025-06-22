@@ -283,4 +283,77 @@ class SynopticMLForecast:
             results[target] = target_results
             self.models[target] = target_results
         
-        return results                
+        return results
+
+    def train_lstm_model(self, df, target_col='temp_1d', sequence_lenght=7):
+        """
+        treina modelo LSTM para previsão de séries temporais
+        """
+        print(f"Treinando modelo LSTM para {target_col} ...")
+
+        # Preparar dados
+        df_features = self.create_features(df)
+        X, y = self.prepare_lstm_data(df_features, sequence_lenght, target_col)
+
+        # Dividir dados
+        train_size = int(len(X) * 0.8)
+        X_train, X_test = X[:train_size], X[train_size:]
+        y_train, y_test = y[:train_size], y[train_size:]
+
+        # Escalar dados
+        scaler_X = MinMaxScaler()
+        scaler_y = MinMaxScaler()
+
+        X_train_scaled = scaler_X.fit_transform(X_train.reshape(-1, X_train.shape[-1]))
+        X_train_scaled = scaler_X.reshape(X_train.shape)
+
+        X_test_scaled = scaler_X.transform(X_test.reshape(-1, X_test.shape[-1]))
+        X_test_scaled = scaler_X.reshape(X_test.shape)
+
+        y_train_scaled = scaler_y.fit_transform(y_train.reshape(-1, 1)).flatten()
+
+        # Construir modelo LSTM
+        model = keras.Sequential([
+            layers.LSTM(50, return_sequences=True, input_shape=(sequence_lenght, X_train.shape[2])),
+            layers.Dropout(0.2),
+            layers.LSTM(50, return_sequences=False),
+            layers.Dropout(0.2),
+            layers.Dense(25),
+            layers.Dense(1)
+        ])
+
+        model.compile(optimizer='adam', loss='mse', metrics=['mae'])
+
+        # Treinar modelo
+        history = model.fit(
+            X_train_scaled, y_train_scaled,
+            batch_size=32,
+            epochs=50,
+            validation_split=0.2,
+            verbose=0
+        )
+
+        # Avaliar modelo
+        y_pred_scaled = model.predict(X_test_scaled)
+        y_pred = scaler_y.inverse_transform(y_pred_scaled).flatten()
+
+        mae = mean_absolute_error(y_test, y_pred)
+        r2 = r2_score(y_test, y_pred)
+
+        print(f" LSTM - MAE: {mae:.3f}, R2: {r2:.3f}")
+
+        # Salvar modelo e scalers
+        lstm_results = {
+            'model': model,
+            'scaler_X': scaler_X,
+            'scaler_y': scaler_y,
+            'mae': mae,
+            'r2': r2,
+            'history': history.history,
+            'predictions': y_pred,
+            'actual': y_test
+        }
+
+        self.models[f'{target_col}_lstm'] = lstm_results
+
+        return lstm_results
