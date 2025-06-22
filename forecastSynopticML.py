@@ -185,7 +185,102 @@ class SynopticMLForecast:
                 targets.append(target)
 
         return np.array(sequences), np.array(targets)
+
+    
+    def train_essemble_models(self, df, target_variable=None):
+        """
+        Treina ensemble de modelos
+        """
+        if target_variables is None:
+            target_variables = ['temp_1d', 'temp_3d', 'pressure_1d', 'pressure_3d', 'precipitation_1d', 'precipitation_3d'] 
         
+        # Preparar features
+        df_features = self.create_features(df)
 
+        # Selecionar features
+        df_features = self.create_features(df)
 
+        # Selecionar features para treinamento
+        feature_cols = [col for col in df_features.columns 
+                    if col not in target_variables + ['date', 'location_id']]
+        
+        self.features_names = feature_cols
+        X = df_features[feature_cols]
+
+        results = {}
+
+        for target in target_variables:
+            print(f"Treinando modelos para {target} ...")
+
+            y = df_features[target]
+
+            # Dividir dados
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+            # Escalar dados
+            scaler = StandardScaler()
+            X_train_scaled = scaler.fit_transform(X_train)
+            X_test_scaled = scaler.transform(X_test)
+
+            self.scalers[target] = scaler
+
+            # Modelos
+            models = {
+                'RandomForest': RandomForestRegressor(n_estimators=100, random_state=42),
+                'GradientBoosting': GradientBoostingRegressor(n_estimators=100, random_state=42),  
+                'MLP': MLPRegressor(hidden_layer_sizes=(100, 50), max_iter=500, random_state=42),
+            }
+
+            target_results = {}
+
+            for name, model in models.items():
+                if name == 'MLP':
+                    model.fit(X_train_scaled, y_train)
+                    y_pred = model.predict(X_test_scaled)
+                else:
+                    model.fit(X_train, y_train)
+                    y_pred = model.predict(X_test)
                 
+                # Metricas
+                mae = mean_absolute_error(y_test, y_pred)
+                mse = mean_absolute_error(y_test, y_pred)
+                r2 = r2_score(y_test, y_pred)
+
+                target_results[name] = {
+                    'model': model,
+                    'mae': mae,
+                    'mse': mse,
+                    'r2': r2,
+                    'predictions': y_pred,
+                    'actual': y_test.values
+                }
+
+                print(f"  {name} - MAE: {mae:3f}, R2: {r2:3f}")
+
+            # Ensemble (média ponderada baseada no R2)
+            weights = {name: max(0, results['r2']) for name, results in target_results.items()}
+            total_weight = sum(weights.values())
+
+            if total_weight > 0:
+                weights = {name: w/total_weight for name, w in weights.items()}
+
+                ensemble_pred = sum(weights[name] * target_results[name]['predictions'] 
+                                    for name in target_results.keys())
+
+                ensemble_mae = mean_absolute_error(y_test, ensemble_pred)
+                ensemble_r2 = r2_score(y_test, ensemble_pred)
+
+                target_results['Ensemble'] = {
+                    'model': None,
+                    'mae': ensemble_mae,
+                    'r2': ensemble_r2,
+                    'predictions': ensemble_pred,
+                    'actual': y_test.values
+                }
+
+                print(f"  Ensemble - MAE: {ensemble_mae:3f}, R2: {ensemble_r2:3f}")
+
+            results[target] = target_results
+            self.models[target] = target_results
+        
+        return results                
