@@ -165,25 +165,26 @@ class SynopticMLForecast:
 
         return df_features
     
-    def prepare_lstm_data(self, df, sequence_lenght=7, target_col='temp_1d'):
+    def prepare_lstm_data(self, df, sequence_length=7, target_col='temp_1d'):
         """
         Prepara dados para modelo LSTM
         """
         sequences = []
         targets = []
-
-        features_cols = ['temperature', 'pressure', 'humidity', 'precipitation', 'wind_speed', 'enso_index', 'nao_index', 'sin_day', 'cos_day']
-
+        
+        feature_cols = ['temperature', 'pressure', 'humidity', 'wind_speed', 
+                       'enso_index', 'nao_index', 'sin_day', 'cos_day']
+        
         for location in df['location_id'].unique():
             location_data = df[df['location_id'] == location].sort_values('date')
-
-            for i in range(len(location_data) - sequence_lenght):
+            
+            for i in range(len(location_data) - sequence_length):
                 seq = location_data[feature_cols].iloc[i:i+sequence_length].values
                 target = location_data[target_col].iloc[i+sequence_length]
-
+                
                 sequences.append(seq)
                 targets.append(target)
-
+        
         return np.array(sequences), np.array(targets)
 
     
@@ -357,3 +358,30 @@ class SynopticMLForecast:
         self.models[f'{target_col}_lstm'] = lstm_results
 
         return lstm_results
+    
+    def analyze_teleconections(self, df):
+        """
+        Analisa correlações com índices de teleconexão
+        """
+        teleconnections = ['enso_index', 'nao_index']
+        weather_vars = ['temperature', 'precipitation', 'pressure']
+
+        correlations = {}
+
+        for tele in teleconnections:
+            correlations[tele] = {}
+            for var in weather_vars:
+               # Correlação geral 
+               corr = df[tele].corr(df[var])
+               correlations[tele][var] = corr
+
+               # Correlação por região (dividir em norte/sul)
+               north = df[df['lat'] > -15]
+               south = df[df['lat' <= -15]]
+
+               correlations[tele][f'{var}_north'] = north[tele].corr(north[var]) if len(north) > 0 else np.nan
+               correlations[tele][f'{var}_south'] = south[tele].corr(south[var]) if len(south) > 0 else np.nan
+        
+        return correlations
+                
+                
