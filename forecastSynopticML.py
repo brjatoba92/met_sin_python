@@ -510,3 +510,43 @@ class SynopticMLForecast:
         if save_path:
             plt.savefig(save_path, dpi=300, bbox_inches='tight')
         plt.show()
+    
+    def create_teleconnection_analysis(self, df, save_path=None):
+        """
+        Cria visualização da análise de teleconexões
+        """
+        correlations = self.analyze_teleconnections(df)
+
+        fig, axes = plt.subplots(2, 2, figsize=(15, 12))
+
+        # ENSO correlations
+        enso_data = correlations['enso_index']
+        vars_enso = list(enso_data.keys())
+        corrs_enso = list(enso_data.values())
+
+        axes[0,0].barh(vars_enso, corrs_enso)
+        axes[0,0].set_title('ENSO Correlations')
+        axes[0,0].set_xlabel('Correlation')
+        axes[0,0].axvline(x=0, color='black', linestyle='-', alpha=0.3)
+
+        # Time series plots
+        sample_data = df.sample(1000).sort_values('date')
+
+        axes[1,0].plot(sample_data['date'], sample_data['enso_index'], label='ENSO')
+        axes[1,0].plot(sample_data['date'], sample_data['temperature']/10, label='Temp/10')
+        axes[1,0].set_title('ENSO vs Temperature')
+        axes[1,0].legend()
+        axes[1,0].tick_parames(axis='x', rotation=45)
+
+        axes[1,1].plot(sample_data['date'], sample_data['nao_index'], label='NAO')
+        axes[1,1].plot(sample_data['date'], sample_data['pressure']/1000, label='Pressure/1000')
+        axes[1,1].set_title('NAO vs Pressure')
+        axes[1,1].legend()
+        axes[1,1].tick_parames(axis='x', rotation=45)
+
+        plt.tight_layout()
+        if save_path:
+            plt.savefig(save_path, dpi=300, bbox_inches='tight')
+
+        plt.show()
+        
