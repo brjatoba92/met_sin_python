@@ -383,5 +383,49 @@ class SynopticMLForecast:
                correlations[tele][f'{var}_south'] = south[tele].corr(south[var]) if len(south) > 0 else np.nan
         
         return correlations
+    
+    def predict_weather(self, input_data, target_variable):
+        """
+        Faz previsão usando ensemble de modelos
+        """
+        if target_variable in self.models:
+            raise ValueError(f"Modelo para {target_variable} ainda nao foi treinado")
+        
+        # Prepara dados de entrada
+        if isinstance(input_data, dict):
+            input_df = pd.DataFrame([input_data])
+            input_features = self.create_features(input_df)
+        else:
+            input_features = self.create_features(input_data)
+        
+        X = input_features[self.features_names]
+
+        # Fazer previsões com todos os modelos
+        models = self.models[target_variable]
+        predictions = {}
+
+        for name, model_info in models.items():
+            if name == 'Ensemble':
+                continue
+
+            if name == 'MLP':
+                "Escalar dados para MLP"
+                scaler = self.scalers[target_variable]
+                X_scaled = scaler.transform(X)
+                pred = model_info['model'].predict(X_scaled)
+
+            else:
+                pred = model_info['model'].predict(X)
+
+            predictions[name] = pred
+        
+        # Ensemble prediction
+        if 'Ensemble' in models:
+            weights = models['Ensemble']['weights']
+            ensemble_pred = sum(weights[name] * predictions[name] for name in predictions.keys())
+            predictions['Ensemble'] = ensemble_pred
+
+        return predictions
+            
                 
                 
