@@ -426,6 +426,87 @@ class SynopticMLForecast:
             predictions['Ensemble'] = ensemble_pred
 
         return predictions
-            
-                
-                
+    
+    def create_forecast_visualization(self, predictions_dict=None, save_path=None):
+        """
+        Cria visualização das previsões
+        """
+        fig, axes = plt.subplots(2, 3, figsize=(18, 12))
+        axes = axes.flatten()
+
+        targets = ['temp_1d', 'temp_3d', 'pressure_1d', 'pressure_3d', 'precipitation_1d', 'precipitation_3d']
+        titles = ['Temperatura (1 dia)', 'Temperatura (3 dias)', 'Pressão (1 dia)', 'Pressão (3 dias)', 'Precipitação (1 dia)', 'Precipitação (3 dias)']
+
+        for i, (target, title) in enumerate(zip(targets, titles)):
+            if target in self.models:
+                models_data = self.models[target]
+
+                # Comparar modelos
+                model_names = []
+                maes = []
+                r2s = []
+
+                for name, data in models_data.items():
+                    if 'mae' in data:
+                        model_names.append(name)
+                        maes.append(data['mae'])
+                        r2s.append(data['r2'])
+
+                # graficos de barras para MAE
+                bars = axes[i].bar(model_names, maes, alpha=0.7)
+                axes[i].set_title(f'{title} - MAE')
+                axes[i].set_ylabel('Mean Absolute Error (MAE)')
+                axes[i].tick_params(axis='x', rotation=45)
+
+                # Colorir barras baseado em performance
+                for j, (bar, r2) in enumerate(zip(bars, r2s)):
+                    if r2 > 0.8:
+                        bar.set_color('green')
+                    elif r2 > 0.6:
+                        bar.set_color('orange')
+                    else:
+                        bar.set_color('red')
+
+                # Adicionar texto com R2
+                for j, (mae, r2) in enumerate(zip(maes, r2s)):
+                    axes[i].text(j, mae + max(maes) * 0.01, f"R2: {r2:.3f}", ha='center', va='bottom', fontsize=8)
+
+        plt.tight_layout()
+        if save_path:
+            plt.savefig(save_path, dpi=300, bbox_inches='tight')
+
+        plt.show()
+
+    def create_prediction_plots(self, target_variable, save_path=None):
+        """
+        Cria gráficos de dispersão das previsões vs valores reais
+        """
+        if target_variable not in self.models:
+            print(f"Modelo para {target_variable} não encontrado")
+            return
+
+        models_data = self.models[target_variable]
+        n_models = len([name for name in models_data.keys() if 'mae' in models_data[name]])   
+
+        fig, axes = plt.subplots(1, n_models, figsize=(5 * n_models, 5))
+        if n_models == 1:
+            axes = [axes]
+        
+        i = 0
+        for name, data in models_data.items():
+            if 'mae' in data:
+                actual = data['actual']
+                predicted = data['predictions']
+
+                axes[i].scatter(actual, predicted, alpha=0.6)
+                axes[i].plot([actual.min(), actual.max()], [actual.min(), actual.max()], 'r--', lw=2)
+                axes[i].set_xlabel('Valores Reais')
+                axes[i].set_ylabel('Valores Preditos')
+                axes[i].set_title(f'{name} - MAE: {data["mae"]:.3f}, R2: {data["r2"]:.3f}')
+                axes[i].grid(True, alpha=0.3)
+                i += 1
+
+        plt.tight_layout()
+        if save_path:
+            plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        plt.show()
