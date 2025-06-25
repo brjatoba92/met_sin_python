@@ -625,3 +625,38 @@ class SynopticMLForecast:
                 plt.savefig(save_path, dpi=300, bbox_inches='tight')
 
             plt.show()
+    
+    def save_model(self, filename):
+        """
+        Salva o modelo treinado
+        """
+        model_data = {
+            'models': {},
+            'scalers': self.scalers,
+            'features_names': self.features_names,
+            'teleconnection_indices': self.teleconnection_indices
+        }
+
+        # Salvar apenas dados serializaveis
+        for target, models in self.models.items():
+            model_data['models'][target] = {}
+            for name, model_info in models.items():
+                if name != 'Ensemble' and 'lstm' not in target:
+                    # Salvar modelos sklearn
+                    model_data['models'][target][name] = {
+                        'mae': model_info['mae'],
+                        'r2': model_info['r2'],
+                        'model_file': f"{filename}_{target}_{name}.joblib",
+                    }
+                    joblib.dump(model_info['model'], f"{filename}_{target}_{name}.joblib")
+                elif name == 'Ensemble'
+                model_data['models'][target][name] = {
+                    'weights': model_info['weights'],
+                    'mae': model_info['mae'],
+                    'r2': model_info['r2'],
+                }
+
+        with open(f"{filename}.json", 'w') as f:
+            json.dump(model_data, f, indent=2)
+
+        print(f"Modelo salvo em {filename}._metadata.json")
