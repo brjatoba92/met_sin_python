@@ -692,3 +692,89 @@ class SynopticMLForecast:
                 json.dump(report, f, indent=2)
 
         return report
+
+def main():
+    """
+    Exemplo de uso completo da plataforma
+    """
+    print("=== Plataforma de Previsão Sinótica com Machine Learning ===")
+
+    # Inicializar sistema
+    forecast_system = SynopticMLForecast()
+
+    # Gerar dados sintéticos
+    print("\n1. Gerando dados meteorológicos sintéticos...")
+    df = forecast_system.generate_synthetic_weather_data(n_samples=3000, n_locations=15)
+    print(f"Dataset criado co {len(df)} registros.")
+    print(f" Variavies {list(df.columns)}")
+
+    # Analise exploratoria
+    print("\n2. Análise exploratória dos dados...")
+    print("Estatísticas descritivas:")
+    print(df.describe())
+
+    # Treinar modelos
+    print("\n3. Treinando modelos ensemple ...")
+    results = forecast_system.train_essemble_models(df)
+
+    # Treinar modelo LSTM
+    print("\n4. Treinando modelo LSTM...")
+    lstm_results = forecast_system.train_lstm_model(df, target_col='temp_1d')
+
+    # Análise de teleconexões
+    print("\n5. Analisando teleconexões...")
+    teleconnections = forecast_system.analyze_teleconections(df)
+    print("Correlações ENSO:")
+    for var, corr in teleconnections['enso_index'].items():
+        print(f" {var}: {corr:.3f}")
+    
+    # Fazer previsão de exemplo
+    print("\n6. Fazendo previsão de exemplo...")
+    sample_input = {
+        'lat': -15.7801,
+        'lon': -47.9292,
+        'day_of_year': 180,
+        'month': 6,
+        'season': 2,
+        'temperature': 22.5,
+        'pressure': 1015.2,
+        'humidity': 65.0,
+        'precipitation': 0.0,
+        'wind_speed': 5.2,
+        'wind_direction': 180.0,
+        'dew_point': 15.2,
+        'heat_index': 22.5,
+        'enso_index': 0.5,
+        'nao_index': -0.2,
+        'pressure_gradient': 1.2,
+        'vorticity': 0.1,
+    }
+
+    predictions = forecast_system.predict_weather(sample_input, 'temp_1d')
+    print("Previsões de temperatura para 1 dia:")
+    for model, pred in predictions.items():
+        print(f" {model}: {pred[0]:.2f} °C")
+    
+    # CRIAR VISUALIZAÇÕES
+    print("\n7. Criando visualizações...")
+    forecast_system.create_forecast_visualization()
+    forecast_system.create_prediction_plots('temp_1d')
+    forecast_system.create_teleconnection_analysis(df)
+    forecast_system.create_geographic_forecast_map(df)
+
+    # Gerar relatorio
+    print("\n8. Gerando relatório...")
+    report = forecast_system.generate_forecast_report(df, 'forecast_report.json')
+
+    # Salvar modelo
+    print("\n9. Salvando modelo...")
+    forecast_system.save_model('synoptic_forecast_model')
+
+    print("\n=== Análise completa finalizada! ===")
+    print("Arquivos gerados:")
+    print("- forecast_report.json: Relatório completo")
+    print("- synoptic_forecast_model_metadata.json: Metadados do modelo")
+    print("- synoptic_forecast_model_*.joblib: Modelos treinados")
+
+    return forecast_system, df, results
+ 
