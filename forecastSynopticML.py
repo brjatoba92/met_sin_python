@@ -660,3 +660,35 @@ class SynopticMLForecast:
             json.dump(model_data, f, indent=2)
 
         print(f"Modelo salvo em {filename}._metadata.json")
+    
+    def generate_forecast_report(self, df, save_path=None):
+        """
+        Gera relatório completo de previsão
+        """
+        report = {
+            'timestamp': datetime.now().isoformat(),
+            'data_summary': {
+                'total_samples': len(df),
+                'date_range': f"{df['date'].min()} to {df['date'].max()}",
+                'locations': len(df['location_id'].nunique()),
+                'variables': list(df.select_dtypes(include=[np.number]).columns)
+            },
+            'model_performance': {},
+            'teleconnection_analysis': self.analyze.teleconections(df)
+        }
+
+        # Performance dos modelos
+        for target, models in self.models.items():
+            report['model_performance'][target] = {}
+            for name, model_info in models.items():
+                if 'mae' in model_info:
+                    report['model_performance'][target][name] = {
+                        'mae': model_info['mae'],
+                        'r2': model_info['r2']
+                    }
+        # Salvar relatorio
+        if save_path:
+            with open(save_path, 'w') as f:
+                json.dump(report, f, indent=2)
+
+        return report
