@@ -549,4 +549,79 @@ class SynopticMLForecast:
             plt.savefig(save_path, dpi=300, bbox_inches='tight')
 
         plt.show()
-        
+    
+    def create_geographic_forecast_map(self, df, target_date=None, save_path=None):
+        """
+        Cria mapa com previsões geográficas
+        """
+        try:
+            fig = plt.figure(figsize=(15, 10))
+            ax = plt.axes(projection=ccrs.PlateCarree())
+
+            # configurar mapa
+            ax.add_feature(cfeature.COASTLINE)
+            ax.add_feature(cfeature.BORDERS)
+            ax.add_feature(cfeature.OCEAN, color='lightblue')
+            ax.add_feature(cfeature.LAND, color='lightgray')
+
+            # focar no Brasil
+            ax.set_extent([-75, -30, -35, 10], crs=ccrs.PlateCarree())
+
+            # dados das estações
+            unique_locations = df.groupby('location').agg({
+                'lat': 'first',
+                'lon': 'first',
+                'temperature': 'mean',
+                'pressure': 'mean',
+            }).reset_index()
+
+            # plotar temperatura
+            scatter = ax.scatter(unique_locations['lon'], unique_locations['lat'],
+                                  c=unique_locations['temperature'],cmap='RdYlBu_r',
+                                  s=100, alpha=0.7, transform=ccrs.PlateCarree())
+            
+            plt.colorbar(scatter, ax=ax, label='Temperatura (°C)')
+            plt.title('Distribuição de Temperatura - Estações Meteorológicas')
+
+            if save_path:
+                plt.savefig(save_path, dpi=300, bbox_inches='tight')
+
+            plt.show()
+        except ImportError:
+            print("Cartopy não disponivel. Criando gráfico alternativo ...")
+
+            # Grafico alternatico sem cartopy
+            unique_locations = df.groupby('location_id').agg({
+                'lat': 'first',
+                'lon': 'first',
+                'temperature': 'mean',
+                'pressure': 'mean',
+            }).reset_index()
+
+            fig, (ax1, ax2) = plt.subplots(1,2, figsize=(15, 6))
+
+            # Temperatura
+
+            scatter1 = ax1.scatter(unique_locations['lon'], unique_locations['lat'],
+                                 c=unique_locations['temperature'],cmap='RdYlBu_r',)
+            
+            ax1.set_xlabel('Longitude')
+            ax1.set_ylabel('Latitude')
+            ax1.set_title('Distribuição de Temperatura - Estações Meteorológicas')
+            plt.colorbar(scatter1, ax=ax1, label='Temperatura (°C)')
+
+            # Precipitação
+            scatter2 = ax2.scatter(unique_locations['lon'], unique_locations['lat'],
+                                c=unique_locations['pressure'],cmap='Blues',
+                                s=100, alpha=0.7)
+            
+            ax2.set_xlabel('Longitude')
+            ax2.set_ylabel('Latitude')
+            ax2.set_title('Precipitação Média por Estação')
+            plt.colorbar(scatter2, ax=ax2, label='Precipitação (mm)')
+
+            plt.tight_layout()
+            if save_path:
+                plt.savefig(save_path, dpi=300, bbox_inches='tight')
+
+            plt.show()
