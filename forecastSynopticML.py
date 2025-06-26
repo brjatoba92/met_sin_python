@@ -777,4 +777,99 @@ def main():
     print("- synoptic_forecast_model_*.joblib: Modelos treinados")
 
     return forecast_system, df, results
- 
+
+class ForecastWebInterface:
+    """
+    Interface web simples para a plataforma de previsão
+    """
+    def __init__(self, forecast_system):
+        self.forecast_system = forecast_system
+    
+    def create_input_form(self):
+        """
+        Cria formulário HTML para entrada de dados
+        """
+        html_form = """
+        <html>
+        <head>
+            <title>Previsão Meteorológica - ML</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 40px; }
+                .form-group { margin: 15px 0; }
+                label { display: inline-block; width: 200px; font-weight: bold; }
+                input { width: 200px; padding: 5px; }
+                button { background-color: #4CAF50; color: white; padding: 10px 20px; 
+                        font-size: 16px; border: none; cursor: pointer; }
+                .result { background-color: #f0f8ff; padding: 20px; margin-top: 20px; 
+                         border-radius: 5px; }
+            </style>
+        </head>
+        <body>
+            <h1>Sistema de Previsão Meteorológica com Machine Learning</h1>
+            
+            <form id="forecastForm">
+                <h3>Dados da Estação Meteorológica</h3>
+                
+                <div class="form-group">
+                    <label>Latitude:</label>
+                    <input type="number" step="0.0001" name="lat" value="-15.7801" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Longitude:</label>
+                    <input type="number" step="0.0001" name="lon" value="-47.9292" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Temperatura (°C):</label>
+                    <input type="number" step="0.1" name="temperature" value="25.0" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Pressão (hPa):</label>
+                    <input type="number" step="0.1" name="pressure" value="1013.2" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Umidade (%):</label>
+                    <input type="number" step="0.1" name="humidity" value="70.0" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Velocidade do Vento (m/s):</label>
+                    <input type="number" step="0.1" name="wind_speed" value="5.0" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Índice ENSO:</label>
+                    <input type="number" step="0.1" name="enso_index" value="0.0" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Índice NAO:</label>
+                    <input type="number" step="0.1" name="nao_index" value="0.0" required>
+                </div>
+                
+                <button type="submit">Gerar Previsão</button>
+            </form>
+            
+            <div id="results" class="result" style="display:none;">
+                <h3>Resultados da Previsão</h3>
+                <div id="prediction-content"></div>
+            </div>
+            
+            <script>
+                document.getElementById('forecastForm').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    // Aqui seria a chamada para o backend Python
+                    document.getElementById('results').style.display = 'block';
+                    document.getElementById('prediction-content').innerHTML = 
+                        '<p><strong>Temperatura prevista (1 dia):</strong> 26.3°C</p>' +
+                        '<p><strong>Confiança:</strong> 85%</p>' +
+                        '<p><em>Esta é uma demonstração. Integre com o backend Python para previsões reais.</em></p>';
+                });
+            </script>
+        </body>
+        </html>
+        """
+        return html_form
