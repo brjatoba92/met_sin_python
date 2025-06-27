@@ -18,6 +18,7 @@ import joblib
 import json
 import warnings
 import os
+from flask import Flask, request, render_template_string, jsonify
 warnings.filterwarnings('ignore')
 
 class SynopticMLForecast:
@@ -905,30 +906,95 @@ class ForecastWebInterface:
     """
     def __init__(self, forecast_system):
         self.forecast_system = forecast_system
-    
-    def create_input_form(self):
+
+    def run(self, host="127.0.0.1", port=8080):
         """
-        Cria formulário HTML para entrada de dados
+        Inicia um servidor web local para a interface de previsão.
         """
-        html_form = """
+
+        app = Flask(__name__)
+
+        @app.route("/", methods=["GET", "POST"])
+        def index():
+            prediction = None
+            confidence = None
+            error = None
+            if request.method == "POST":
+                try:
+                    # Coletar dados do formulário
+                    input_data = {
+                        "lat": float(request.form.get("lat", -15.7801)),
+                        "lon": float(request.form.get("lon", -47.9292)),
+                        "temperature": float(request.form.get("temperature", 25.0)),
+                        "pressure": float(request.form.get("pressure", 1013.2)),
+                        "humidity": float(request.form.get("humidity", 70.0)),
+                        "wind_speed": float(request.form.get("wind_speed", 5.0)),
+                        "enso_index": float(request.form.get("enso_index", 0.0)),
+                        "nao_index": float(request.form.get("nao_index", 0.0)),
+                        # Preencher valores padrão para variáveis obrigatórias
+                        "day_of_year": 180,
+                        "month": 6,
+                        "season": 2,
+                        "precipitation": 0.0,
+                        "wind_direction": 180.0,
+                        "dewpoint": 15.0,
+                        "heat_index": 25.0,
+                        "pressure_gradient": 1.0,
+                        "vorticity": 0.0
+                    }
+                    preds = self.forecast_system.predict_weather(input_data, "temp_1d")
+                    if "Ensemble" in preds:
+                        prediction = float(preds["Ensemble"][0])
+                        confidence = "R²: {:.1f}%".format(
+                            100 * self.forecast_system.models["temp_1d"]["Ensemble"]["r2"]
+                        )
+                    else:
+                        # Pega o primeiro modelo disponível
+                        key = next(iter(preds))
+                        prediction = float(preds[key][0])
+                        confidence = "Modelo: {}".format(key)
+                except Exception as ex:
+                    error = f"Erro ao processar previsão: {ex}"
+
+            html_form = self.create_input_form(prediction, confidence, error)
+            # Salvar HTML na pasta resultados_forecastSynopticML
+            output_dir = "resultados_forecastSynopticML"
+            os.makedirs(output_dir, exist_ok=True)
+            html_path = os.path.join(output_dir, "web_interface_last.html")
+            try:
+                with open(html_path, "w", encoding="utf-8") as f:
+                    f.write(html_form)
+            except Exception as e:
+                print(f"Erro ao salvar HTML: {e}")
+            return render_template_string(html_form)
+
+        print(f"Interface web disponível em http://{host}:{port}")
+        app.run(host=host, port=port, debug=False)
+
+    def create_input_form(self, prediction=None, confidence=None, error=None):
+        """
+        Cria formulário HTML para entrada de dados e exibe resultado se houver.
+        """
+        html_form = f"""
         <html>
         <head>
             <title>Previsão Meteorológica - ML</title>
             <style>
-                body { font-family: Arial, sans-serif; margin: 40px; }
-                .form-group { margin: 15px 0; }
-                label { display: inline-block; width: 200px; font-weight: bold; }
-                input { width: 200px; padding: 5px; }
-                button { background-color: #4CAF50; color: white; padding: 10px 20px; 
-                        font-size: 16px; border: none; cursor: pointer; }
-                .result { background-color: #f0f8ff; padding: 20px; margin-top: 20px; 
-                         border-radius: 5px; }
+                body {{ font-family: Arial, sans-serif; margin: 40px; }}
+                .form-group {{ margin: 15px 0; }}
+                label {{ display: inline-block; width: 200px; font-weight: bold; }}
+                input {{ width: 200px; padding: 5px; }}
+                button {{ background-color: #4CAF50; color: white; padding: 10px 20px; 
+                        font-size: 16px; border: none; cursor: pointer; }}
+                .result {{ background-color: #f0f8ff; padding: 20px; margin-top: 20px; 
+                         border-radius: 5px; }}
+                .error {{ color: red; font-weight: bold; }}
             </style>
         </head>
         <body>
             <h1>Sistema de Previsão Meteorológica com Machine Learning</h1>
             
-            <form id="forecastForm">
+            <form id="forecastForm" method="post">
                 <h3>Dados da Estação Meteorológica</h3>
                 
                 <div class="form-group">
@@ -974,22 +1040,11 @@ class ForecastWebInterface:
                 <button type="submit">Gerar Previsão</button>
             </form>
             
-            <div id="results" class="result" style="display:none;">
-                <h3>Resultados da Previsão</h3>
-                <div id="prediction-content"></div>
-            </div>
-            
-            <script>
-                document.getElementById('forecastForm').addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    // Aqui seria a chamada para o backend Python
-                    document.getElementById('results').style.display = 'block';
-                    document.getElementById('prediction-content').innerHTML = 
-                        '<p><strong>Temperatura prevista (1 dia):</strong> 26.3°C</p>' +
-                        '<p><strong>Confiança:</strong> 85%</p>' +
-                        '<p><em>Esta é uma demonstração. Integre com o backend Python para previsões reais.</em></p>';
-                });
-            </script>
+            {"<div class='result'><h3>Resultados da Previsão</h3>" if prediction is not None or error else ""}
+            {f"<p><strong>Temperatura prevista (1 dia):</strong> {prediction:.2f}°C</p>" if prediction is not None else ""}
+            {f"<p><strong>Confiança:</strong> {confidence}</p>" if confidence else ""}
+            {f"<p class='error'>{error}</p>" if error else ""}
+            {"</div>" if prediction is not None or error else ""}
         </body>
         </html>
         """
