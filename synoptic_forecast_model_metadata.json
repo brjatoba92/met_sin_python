@@ -1,0 +1,203 @@
+{
+  "models": {
+    "temp_1d": {
+      "RandomForest": {
+        "mae": 0.8284102665535402,
+        "r2": 0.9899716016998953,
+        "model_file": "synoptic_forecast_model_temp_1d_RandomForest.joblib"
+      },
+      "GradientBoosting": {
+        "mae": 0.8093800055996325,
+        "r2": 0.9904110533601366,
+        "model_file": "synoptic_forecast_model_temp_1d_GradientBoosting.joblib"
+      },
+      "MLP": {
+        "mae": 0.8496930261276453,
+        "r2": 0.9894244613224218,
+        "model_file": "synoptic_forecast_model_temp_1d_MLP.joblib"
+      },
+      "Ensemble": {
+        "weights": {
+          "RandomForest": 0.33334542039409876,
+          "GradientBoosting": 0.3334933935260295,
+          "MLP": 0.33316118607987166
+        },
+        "mae": 0.8139894131318637,
+        "r2": 0.9902985520499525
+      }
+    },
+    "temp_3d": {
+      "RandomForest": {
+        "mae": 1.6337828837451969,
+        "r2": 0.9615767382436512,
+        "model_file": "synoptic_forecast_model_temp_3d_RandomForest.joblib"
+      },
+      "GradientBoosting": {
+        "mae": 1.600825980156261,
+        "r2": 0.9629533597465411,
+        "model_file": "synoptic_forecast_model_temp_3d_GradientBoosting.joblib"
+      },
+      "MLP": {
+        "mae": 1.6924004903174918,
+        "r2": 0.9587798722723047,
+        "model_file": "synoptic_forecast_model_temp_3d_MLP.joblib"
+      },
+      "Ensemble": {
+        "weights": {
+          "RandomForest": 0.33349752477570394,
+          "GradientBoosting": 0.3339749696280049,
+          "MLP": 0.33252750559629124
+        },
+        "mae": 1.6130630862118314,
+        "r2": 0.9624906040407554
+      }
+    },
+    "pressure_1d": {
+      "RandomForest": {
+        "mae": 1.6516589347173936,
+        "r2": 0.8603546594267352,
+        "model_file": "synoptic_forecast_model_pressure_1d_RandomForest.joblib"
+      },
+      "GradientBoosting": {
+        "mae": 1.630568167816518,
+        "r2": 0.8641444742441694,
+        "model_file": "synoptic_forecast_model_pressure_1d_GradientBoosting.joblib"
+      },
+      "MLP": {
+        "mae": 1.8602136691245068,
+        "r2": 0.8208154945888428,
+        "model_file": "synoptic_forecast_model_pressure_1d_MLP.joblib"
+      },
+      "Ensemble": {
+        "weights": {
+          "RandomForest": 0.3380150531783046,
+          "GradientBoosting": 0.33950399084257493,
+          "MLP": 0.3224809559791204
+        },
+        "mae": 1.6566862838789242,
+        "r2": 0.8595542843953256
+      }
+    },
+    "pressure_3d": {
+      "RandomForest": {
+        "mae": 2.4385723698677717,
+        "r2": 0.737059630488582,
+        "model_file": "synoptic_forecast_model_pressure_3d_RandomForest.joblib"
+      },
+      "GradientBoosting": {
+        "mae": 2.3972615166345834,
+        "r2": 0.7449682621849638,
+        "model_file": "synoptic_forecast_model_pressure_3d_GradientBoosting.joblib"
+      },
+      "MLP": {
+        "mae": 2.8835759089417823,
+        "r2": 0.629888447743407,
+        "model_file": "synoptic_forecast_model_pressure_3d_MLP.joblib"
+      },
+      "Ensemble": {
+        "weights": {
+          "RandomForest": 0.3490003919109151,
+          "GradientBoosting": 0.3527451575273506,
+          "MLP": 0.2982544505617344
+        },
+        "mae": 2.45656816378689,
+        "r2": 0.732875749103157
+      }
+    },
+    "precip_1d": {
+      "RandomForest": {
+        "mae": 1.0769734537309044,
+        "r2": 0.7887844896800941,
+        "model_file": "synoptic_forecast_model_precip_1d_RandomForest.joblib"
+      },
+      "GradientBoosting": {
+        "mae": 1.0418581790500836,
+        "r2": 0.7986690324278432,
+        "model_file": "synoptic_forecast_model_precip_1d_GradientBoosting.joblib"
+      },
+      "MLP": {
+        "mae": 1.1621439005602376,
+        "r2": 0.7419979321850944,
+        "model_file": "synoptic_forecast_model_precip_1d_MLP.joblib"
+      },
+      "Ensemble": {
+        "weights": {
+          "RandomForest": 0.33861383469761264,
+          "GradientBoosting": 0.34285712670935753,
+          "MLP": 0.3185290385930297
+        },
+        "mae": 1.0648455653254951,
+        "r2": 0.7914277059217387
+      }
+    },
+    "precip_3d": {
+      "RandomForest": {
+        "mae": 1.5937305757908178,
+        "r2": 0.6174368009874405,
+        "model_file": "synoptic_forecast_model_precip_3d_RandomForest.joblib"
+      },
+      "GradientBoosting": {
+        "mae": 1.5428139424793064,
+        "r2": 0.6330961769705938,
+        "model_file": "synoptic_forecast_model_precip_3d_GradientBoosting.joblib"
+      },
+      "MLP": {
+        "mae": 1.7654553305423595,
+        "r2": 0.4978096805374088,
+        "model_file": "synoptic_forecast_model_precip_3d_MLP.joblib"
+      },
+      "Ensemble": {
+        "weights": {
+          "RandomForest": 0.3531554858466835,
+          "GradientBoosting": 0.3621121831548812,
+          "MLP": 0.2847323309984353
+        },
+        "mae": 1.581548892030359,
+        "r2": 0.6197725737774019
+      }
+    },
+    "temp_1d_lstm": {}
+  },
+  "scalers": {
+    "temp_1d": "synoptic_forecast_model_scaler_temp_1d.joblib",
+    "temp_3d": "synoptic_forecast_model_scaler_temp_3d.joblib",
+    "pressure_1d": "synoptic_forecast_model_scaler_pressure_1d.joblib",
+    "pressure_3d": "synoptic_forecast_model_scaler_pressure_3d.joblib",
+    "precip_1d": "synoptic_forecast_model_scaler_precip_1d.joblib",
+    "precip_3d": "synoptic_forecast_model_scaler_precip_3d.joblib"
+  },
+  "feature_names": [
+    "lat",
+    "lon",
+    "day_of_year",
+    "month",
+    "season",
+    "temperature",
+    "pressure",
+    "humidity",
+    "precipitation",
+    "wind_speed",
+    "wind_direction",
+    "dewpoint",
+    "heat_index",
+    "enso_index",
+    "nao_index",
+    "pressure_gradient",
+    "vorticity",
+    "sin_day",
+    "cos_day",
+    "lat_sin",
+    "lon_sin",
+    "temp_humidity",
+    "pressure_gradient_abs",
+    "temperature_lag1",
+    "temperature_lag3",
+    "pressure_lag1",
+    "pressure_lag3",
+    "humidity_lag1",
+    "humidity_lag3",
+    "temperature_trend",
+    "pressure_trend"
+  ],
+  "teleconnection_indices": {}
+}

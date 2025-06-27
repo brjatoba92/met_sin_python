@@ -1,0 +1,169 @@
+{
+  "timestamp": "2025-06-27T15:21:44.956470",
+  "data_summary": {
+    "total_samples": 45000,
+    "date_range": "2020-01-01 00:00:00 to 2023-12-30 00:00:00",
+    "locations": 15,
+    "variables": [
+      "location_id",
+      "lat",
+      "lon",
+      "day_of_year",
+      "month",
+      "season",
+      "temperature",
+      "pressure",
+      "humidity",
+      "precipitation",
+      "wind_speed",
+      "wind_direction",
+      "dewpoint",
+      "heat_index",
+      "enso_index",
+      "nao_index",
+      "pressure_gradient",
+      "vorticity",
+      "temp_1d",
+      "temp_3d",
+      "pressure_1d",
+      "pressure_3d",
+      "precip_1d",
+      "precip_3d"
+    ]
+  },
+  "model_performance": {
+    "temp_1d": {
+      "RandomForest": {
+        "mae": 0.8284102665535402,
+        "r2": 0.9899716016998953
+      },
+      "GradientBoosting": {
+        "mae": 0.8093800055996325,
+        "r2": 0.9904110533601366
+      },
+      "MLP": {
+        "mae": 0.8496930261276453,
+        "r2": 0.9894244613224218
+      },
+      "Ensemble": {
+        "mae": 0.8139894131318637,
+        "r2": 0.9902985520499525
+      }
+    },
+    "temp_3d": {
+      "RandomForest": {
+        "mae": 1.6337828837451969,
+        "r2": 0.9615767382436512
+      },
+      "GradientBoosting": {
+        "mae": 1.600825980156261,
+        "r2": 0.9629533597465411
+      },
+      "MLP": {
+        "mae": 1.6924004903174918,
+        "r2": 0.9587798722723047
+      },
+      "Ensemble": {
+        "mae": 1.6130630862118314,
+        "r2": 0.9624906040407554
+      }
+    },
+    "pressure_1d": {
+      "RandomForest": {
+        "mae": 1.6516589347173936,
+        "r2": 0.8603546594267352
+      },
+      "GradientBoosting": {
+        "mae": 1.630568167816518,
+        "r2": 0.8641444742441694
+      },
+      "MLP": {
+        "mae": 1.8602136691245068,
+        "r2": 0.8208154945888428
+      },
+      "Ensemble": {
+        "mae": 1.6566862838789242,
+        "r2": 0.8595542843953256
+      }
+    },
+    "pressure_3d": {
+      "RandomForest": {
+        "mae": 2.4385723698677717,
+        "r2": 0.737059630488582
+      },
+      "GradientBoosting": {
+        "mae": 2.3972615166345834,
+        "r2": 0.7449682621849638
+      },
+      "MLP": {
+        "mae": 2.8835759089417823,
+        "r2": 0.629888447743407
+      },
+      "Ensemble": {
+        "mae": 2.45656816378689,
+        "r2": 0.732875749103157
+      }
+    },
+    "precip_1d": {
+      "RandomForest": {
+        "mae": 1.0769734537309044,
+        "r2": 0.7887844896800941
+      },
+      "GradientBoosting": {
+        "mae": 1.0418581790500836,
+        "r2": 0.7986690324278432
+      },
+      "MLP": {
+        "mae": 1.1621439005602376,
+        "r2": 0.7419979321850944
+      },
+      "Ensemble": {
+        "mae": 1.0648455653254951,
+        "r2": 0.7914277059217387
+      }
+    },
+    "precip_3d": {
+      "RandomForest": {
+        "mae": 1.5937305757908178,
+        "r2": 0.6174368009874405
+      },
+      "GradientBoosting": {
+        "mae": 1.5428139424793064,
+        "r2": 0.6330961769705938
+      },
+      "MLP": {
+        "mae": 1.7654553305423595,
+        "r2": 0.4978096805374088
+      },
+      "Ensemble": {
+        "mae": 1.581548892030359,
+        "r2": 0.6197725737774019
+      }
+    },
+    "temp_1d_lstm": {}
+  },
+  "teleconnection_analysis": {
+    "enso_index": {
+      "temperature": 0.5701568656376123,
+      "temperature_north": 0.7472823741321222,
+      "temperature_south": 0.8064171075208552,
+      "precipitation": 0.15021514020513826,
+      "precipitation_north": 0.15092821703426337,
+      "precipitation_south": 0.14945787668381696,
+      "pressure": 0.004282641675890729,
+      "pressure_north": 0.006165199824495793,
+      "pressure_south": 0.002876700548380993
+    },
+    "nao_index": {
+      "temperature": 0.0038355010092957806,
+      "temperature_north": 0.0073237478380522286,
+      "temperature_south": 0.0028699060481193884,
+      "precipitation": 0.07069078641066318,
+      "precipitation_north": 0.06272228300439056,
+      "precipitation_south": 0.08020022045601835,
+      "pressure": 0.6404137856619813,
+      "pressure_north": 0.6935348721633633,
+      "pressure_south": 0.6947174869291908
+    }
+  }
+}

@@ -142,32 +142,52 @@ class SynopticMLForecast:
         Cria features para modelos de ML
         """
         df_features = df.copy()
-        
+    
         # Features temporais
         df_features['sin_day'] = np.sin(2 * np.pi * df_features['day_of_year'] / 365)
         df_features['cos_day'] = np.cos(2 * np.pi * df_features['day_of_year'] / 365)
-        
+    
         # Features de localização
         df_features['lat_sin'] = np.sin(np.radians(df_features['lat']))
         df_features['lon_sin'] = np.sin(np.radians(df_features['lon']))
-        
+    
         # Features de interação
         df_features['temp_humidity'] = df_features['temperature'] * df_features['humidity']
         df_features['pressure_gradient_abs'] = np.abs(df_features['pressure_gradient'])
-        
-        # Lag features (valores anteriores)
-        for col in ['temperature', 'pressure', 'humidity']:
-            df_features[f'{col}_lag1'] = df_features.groupby('location_id')[col].shift(1)
-            df_features[f'{col}_lag3'] = df_features.groupby('location_id')[col].shift(3)
-        
+    
+        # Verificar se location_id existe e se há múltiplas localizações
+        has_location_id = 'location_id' in df_features.columns
+        multiple_locations = has_location_id and len(df_features['location_id'].unique()) > 1
+    
+        # Features de lag (valores anteriores)
+        lag_columns = ['temperature', 'pressure', 'humidity']
+        for col in lag_columns:
+            if col in df_features.columns:
+                if multiple_locations:
+                    # Múltiplas localizações - usar groupby
+                    df_features[f'{col}_lag1'] = df_features.groupby('location_id')[col].shift(1)
+                    df_features[f'{col}_lag3'] = df_features.groupby('location_id')[col].shift(3)
+                else:
+                    # Uma localização ou sem location_id - shift simples
+                    df_features[f'{col}_lag1'] = df_features[col].shift(1)
+                    df_features[f'{col}_lag3'] = df_features[col].shift(3)
+    
         # Features de tendência
-        for col in ['temperature', 'pressure']:
-            df_features[f'{col}_trend'] = (df_features.groupby('location_id')[col].diff() / 
-                                         df_features.groupby('location_id')[col].shift(1) * 100)
-        
+        trend_columns = ['temperature', 'pressure']
+        for col in trend_columns:
+            if col in df_features.columns:
+                if multiple_locations:
+                    # Múltiplas localizações - usar groupby
+                    df_features[f'{col}_trend'] = (df_features.groupby('location_id')[col].diff() / 
+                                            df_features.groupby('location_id')[col].shift(1) * 100)
+                else:
+                    # Uma localização ou sem location_id - diff simples
+                    df_features[f'{col}_trend'] = (df_features[col].diff() / 
+                                            df_features[col].shift(1) * 100)
+    
         # Preencher NaN com médias
         df_features = df_features.fillna(df_features.mean())
-        
+    
         return df_features
     
     def prepare_lstm_data(self, df, sequence_length=7, target_col='temp_1d'):
@@ -394,40 +414,65 @@ class SynopticMLForecast:
         """
         if target_variable not in self.models:
             raise ValueError(f"Modelo para {target_variable} não foi treinado")
-        
+    
         # Preparar dados de entrada
         if isinstance(input_data, dict):
             input_df = pd.DataFrame([input_data])
-            input_features = self.create_features(input_df)
         else:
-            input_features = self.create_features(input_data)
-        
+            input_df = input_data.copy()
+    
+        # Debug: verificar colunas de entrada
+        print("Colunas do input_df antes de create_features:", input_df.columns.tolist())
+    
+        # Criar features
+        input_features = self.create_features(input_df)
+    
+        # Debug: verificar features criadas
+        print("Features criadas:", input_features.columns.tolist())
+        print("Feature names esperadas:", self.feature_names)
+    
+        # Verificar se todas as features necessárias estão presentes
+        missing_features = set(self.feature_names) - set(input_features.columns)
+        if missing_features:
+            print(f"Aviso: Features ausentes: {missing_features}")
+            # Adicionar features ausentes com valor 0
+            for feature in missing_features:
+                input_features[feature] = 0
+    
+        # Selecionar apenas as features usadas no treinamento
         X = input_features[self.feature_names]
-        
+        # Preencher NaN com 0 para evitar erros nos modelos
+        X = X.fillna(0)
+    
         # Fazer previsões com todos os modelos
         models = self.models[target_variable]
         predictions = {}
-        
+    
         for name, model_info in models.items():
             if name == 'Ensemble':
                 continue
-                
-            if name == 'MLP':
-                # Escalar dados para MLP
-                scaler = self.scalers[target_variable]
-                X_scaled = scaler.transform(X)
-                pred = model_info['model'].predict(X_scaled)
-            else:
-                pred = model_info['model'].predict(X)
             
-            predictions[name] = pred
-        
+            try:
+                if name == 'MLP':
+                    # Preencher NaN antes de escalar para MLP
+                    scaler = self.scalers[target_variable]
+                    X_no_nan = X.fillna(0)
+                    X_scaled = scaler.transform(X_no_nan)
+                    pred = model_info['model'].predict(X_scaled)
+                else:
+                    pred = model_info['model'].predict(X)
+            
+                predictions[name] = pred
+            except Exception as e:
+                print(f"Erro ao fazer previsão com {name}: {e}")
+                predictions[name] = np.array([0])  # Valor padrão em caso de erro
+    
         # Ensemble prediction
-        if 'Ensemble' in models:
+        if 'Ensemble' in models and len(predictions) > 0:
             weights = models['Ensemble']['weights']
-            ensemble_pred = sum(weights[name] * predictions[name] for name in weights.keys())
+            ensemble_pred = sum(weights.get(name, 0) * predictions[name] for name in predictions.keys())
             predictions['Ensemble'] = ensemble_pred
-        
+    
         return predictions
     
     def create_forecast_visualization(self, predictions_dict=None, save_path=None):
@@ -644,10 +689,15 @@ class SynopticMLForecast:
         """
         model_data = {
             'models': {},
-            'scalers': self.scalers,
+            'scalers': {},
             'feature_names': self.feature_names,
             'teleconnection_indices': self.teleconnection_indices
         }
+        # Save each scaler with joblib and store file path
+        for target, scaler in self.scalers.items():
+            scaler_file = f"{filename}_scaler_{target}.joblib"
+            joblib.dump(scaler, scaler_file)
+            model_data['scalers'][target] = scaler_file
         
         # Salvar apenas dados serializáveis
         for target, models in self.models.items():
@@ -716,11 +766,27 @@ class SynopticMLForecast:
         # Performance dos modelos
         for target, models in self.models.items():
             report['model_performance'][target] = {}
-            for name, model_info in models.items():
-                if 'mae' in model_info:
-                    report['model_performance'][target][name] = {
-                        'mae': float(model_info['mae']),
-                        'r2': float(model_info['r2'])
+            # Se models for um dicionário (ensemble/sklearn), iterar normalmente
+            if isinstance(models, dict):
+                for name, model_info in models.items():
+                    if isinstance(model_info, dict) and 'mae' in model_info and 'r2' in model_info:
+                        mae = model_info['mae']
+                        r2 = model_info['r2']
+                        # Se for lista, pega o primeiro elemento
+                        if isinstance(mae, list):
+                            mae = mae[0] if len(mae) > 0 else None
+                        if isinstance(r2, list):
+                            r2 = r2[0] if len(r2) > 0 else None
+                        report['model_performance'][target][name] = {
+                            'mae': float(mae) if mae is not None else None,
+                            'r2': float(r2) if r2 is not None else None
+                        }
+            # Se models for um resultado LSTM (dict com 'mae' e 'r2')
+            elif isinstance(models, object) and hasattr(models, 'get'):
+                if 'mae' in models and 'r2' in models:
+                    report['model_performance'][target] = {
+                        'mae': float(models['mae']),
+                        'r2': float(models['r2'])
                     }
         
         # Salvar relatório
@@ -800,7 +866,7 @@ def main():
     forecast_system.create_prediction_plots('temp_1d')
     forecast_system.create_teleconnection_analysis(df)
     forecast_system.create_geographic_forecast_map(df)
-    
+
     # Gerar relatório
     print("\n8. Gerando relatório...")
     report = forecast_system.generate_forecast_report(df, 'forecast_report.json')
