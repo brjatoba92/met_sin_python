@@ -17,6 +17,7 @@ from datetime import datetime, timedelta
 import joblib
 import json
 import warnings
+import os
 warnings.filterwarnings('ignore')
 
 class SynopticMLForecast:
@@ -475,40 +476,38 @@ class SynopticMLForecast:
     
         return predictions
     
-    def create_forecast_visualization(self, predictions_dict=None, save_path=None):
+    def create_forecast_visualization(self, predictions_dict=None, save_path_prefix="forecast_fig"):
         """
-        Cria visualização das previsões
+        Cria visualização das previsões e salva cada gráfico como figura separada.
+        Salva as imagens na pasta 'resultados_forecastSynopticML'.
         """
-        fig, axes = plt.subplots(2, 3, figsize=(18, 12))
-        axes = axes.flatten()
-        
+        output_dir = "resultados_forecastSynopticML"
+        os.makedirs(output_dir, exist_ok=True)
+
         targets = ['temp_1d', 'temp_3d', 'pressure_1d', 'pressure_3d', 'precip_1d', 'precip_3d']
         titles = ['Temperatura (1 dia)', 'Temperatura (3 dias)', 
-                 'Pressão (1 dia)', 'Pressão (3 dias)',
-                 'Precipitação (1 dia)', 'Precipitação (3 dias)']
-        
+                  'Pressão (1 dia)', 'Pressão (3 dias)',
+                  'Precipitação (1 dia)', 'Precipitação (3 dias)']
+
         for i, (target, title) in enumerate(zip(targets, titles)):
             if target in self.models:
                 models_data = self.models[target]
-                
-                # Comparar modelos
                 model_names = []
                 maes = []
                 r2s = []
-                
+
                 for name, data in models_data.items():
                     if 'mae' in data:
                         model_names.append(name)
                         maes.append(data['mae'])
                         r2s.append(data['r2'])
-                
-                # Gráfico de barras para MAE
-                bars = axes[i].bar(model_names, maes, alpha=0.7)
-                axes[i].set_title(f'{title} - MAE')
-                axes[i].set_ylabel('Mean Absolute Error')
-                axes[i].tick_params(axis='x', rotation=45)
-                
-                # Colorir barras baseado em performance
+
+                fig, ax = plt.subplots(figsize=(7, 5))
+                bars = ax.bar(model_names, maes, alpha=0.7)
+                ax.set_title(f'{title} - MAE')
+                ax.set_ylabel('Mean Absolute Error')
+                ax.tick_params(axis='x', rotation=45)
+
                 for j, (bar, r2) in enumerate(zip(bars, r2s)):
                     if r2 > 0.8:
                         bar.set_color('green')
@@ -516,104 +515,121 @@ class SynopticMLForecast:
                         bar.set_color('orange')
                     else:
                         bar.set_color('red')
-                
-                # Adicionar texto com R²
+
                 for j, (mae, r2) in enumerate(zip(maes, r2s)):
-                    axes[i].text(j, mae + max(maes) * 0.01, f'R²: {r2:.3f}', 
-                               ha='center', va='bottom', fontsize=8)
-        
-        plt.tight_layout()
-        if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        plt.show()
+                    ax.text(j, mae + max(maes) * 0.01, f'R²: {r2:.3f}', 
+                            ha='center', va='bottom', fontsize=8)
+
+                plt.tight_layout()
+                fig_filename = os.path.join(output_dir, f"{save_path_prefix}_{target}.png")
+                plt.savefig(fig_filename, dpi=300, bbox_inches='tight')
+                plt.close(fig)
     
-    def create_prediction_plots(self, target_variable, save_path=None):
+    def create_prediction_plots(self, target_variable, save_path_prefix=None):
         """
-        Cria gráficos de dispersão das previsões vs valores reais
+        Cria gráficos de dispersão das previsões vs valores reais e salva cada gráfico como figura separada.
+        Salva as imagens na pasta 'resultados_forecastSynopticML'.
         """
+        output_dir = "resultados_forecastSynopticML"
+        os.makedirs(output_dir, exist_ok=True)
+
         if target_variable not in self.models:
             print(f"Modelo para {target_variable} não encontrado")
             return
-        
+
         models_data = self.models[target_variable]
-        n_models = len([name for name in models_data.keys() if 'mae' in models_data[name]])
-        
-        fig, axes = plt.subplots(1, n_models, figsize=(5*n_models, 5))
-        if n_models == 1:
-            axes = [axes]
-        
-        i = 0
         for name, data in models_data.items():
             if 'mae' in data:
                 actual = data['actual']
                 predicted = data['predictions']
-                
-                axes[i].scatter(actual, predicted, alpha=0.6)
-                axes[i].plot([actual.min(), actual.max()], 
-                           [actual.min(), actual.max()], 'r--', lw=2)
-                axes[i].set_xlabel('Valores Reais')
-                axes[i].set_ylabel('Valores Preditos')
-                axes[i].set_title(f'{name}\nMAE: {data["mae"]:.3f}, R²: {data["r2"]:.3f}')
-                axes[i].grid(True, alpha=0.3)
-                i += 1
-        
-        plt.tight_layout()
-        if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        plt.show()
+
+                fig, ax = plt.subplots(figsize=(6, 6))
+                ax.scatter(actual, predicted, alpha=0.6)
+                ax.plot([actual.min(), actual.max()],
+                        [actual.min(), actual.max()], 'r--', lw=2)
+                ax.set_xlabel('Valores Reais')
+                ax.set_ylabel('Valores Preditos')
+                ax.set_title(f'{name}\nMAE: {data["mae"]:.3f}, R²: {data["r2"]:.3f}')
+                ax.grid(True, alpha=0.3)
+
+                plt.tight_layout()
+                if save_path_prefix:
+                    fig_filename = os.path.join(output_dir, f"{save_path_prefix}_{target_variable}_{name}.png")
+                else:
+                    fig_filename = os.path.join(output_dir, f"prediction_{target_variable}_{name}.png")
+                plt.savefig(fig_filename, dpi=300, bbox_inches='tight')
+                plt.close(fig)
     
-    def create_teleconnection_analysis(self, df, save_path=None):
+    def create_teleconnection_analysis(self, df, save_path_prefix="teleconnection_analysis"):
         """
-        Cria visualização da análise de teleconexões
+        Cria visualização da análise de teleconexões e salva cada gráfico como figura separada.
+        Salva as imagens na pasta 'resultados_forecastSynopticML'.
         """
+        output_dir = "resultados_forecastSynopticML"
+        os.makedirs(output_dir, exist_ok=True)
+
         correlations = self.analyze_teleconnections(df)
-        
-        fig, axes = plt.subplots(2, 2, figsize=(15, 12))
         
         # ENSO correlations
         enso_data = correlations['enso_index']
         vars_enso = list(enso_data.keys())
         corrs_enso = list(enso_data.values())
         
-        axes[0,0].barh(vars_enso, corrs_enso)
-        axes[0,0].set_title('Correlações ENSO')
-        axes[0,0].set_xlabel('Correlação')
-        axes[0,0].axvline(x=0, color='black', linestyle='-', alpha=0.3)
+        fig_enso, ax_enso = plt.subplots(figsize=(8, 6))
+        ax_enso.barh(vars_enso, corrs_enso)
+        ax_enso.set_title('Correlações ENSO')
+        ax_enso.set_xlabel('Correlação')
+        ax_enso.axvline(x=0, color='black', linestyle='-', alpha=0.3)
+        plt.tight_layout()
+        fig_enso.savefig(os.path.join(output_dir, f"{save_path_prefix}_enso.png"), dpi=300, bbox_inches='tight')
+        plt.close(fig_enso)
         
         # NAO correlations
         nao_data = correlations['nao_index']
         vars_nao = list(nao_data.keys())
         corrs_nao = list(nao_data.values())
         
-        axes[0,1].barh(vars_nao, corrs_nao)
-        axes[0,1].set_title('Correlações NAO')
-        axes[0,1].set_xlabel('Correlação')
-        axes[0,1].axvline(x=0, color='black', linestyle='-', alpha=0.3)
+        fig_nao, ax_nao = plt.subplots(figsize=(8, 6))
+        ax_nao.barh(vars_nao, corrs_nao)
+        ax_nao.set_title('Correlações NAO')
+        ax_nao.set_xlabel('Correlação')
+        ax_nao.axvline(x=0, color='black', linestyle='-', alpha=0.3)
+        plt.tight_layout()
+        fig_nao.savefig(os.path.join(output_dir, f"{save_path_prefix}_nao.png"), dpi=300, bbox_inches='tight')
+        plt.close(fig_nao)
         
         # Time series plots
-        sample_data = df.sample(1000).sort_values('date')
+        sample_data = df.sample(min(1000, len(df))).sort_values('date')
         
-        axes[1,0].plot(sample_data['date'], sample_data['enso_index'], label='ENSO')
-        axes[1,0].plot(sample_data['date'], sample_data['temperature']/10, label='Temp/10')
-        axes[1,0].set_title('ENSO vs Temperatura')
-        axes[1,0].legend()
-        axes[1,0].tick_params(axis='x', rotation=45)
-        
-        axes[1,1].plot(sample_data['date'], sample_data['nao_index'], label='NAO')
-        axes[1,1].plot(sample_data['date'], sample_data['pressure']/1000, label='Press/1000')
-        axes[1,1].set_title('NAO vs Pressão')
-        axes[1,1].legend()
-        axes[1,1].tick_params(axis='x', rotation=45)
-        
+        fig_enso_ts, ax_enso_ts = plt.subplots(figsize=(10, 5))
+        ax_enso_ts.plot(sample_data['date'], sample_data['enso_index'], label='ENSO')
+        ax_enso_ts.plot(sample_data['date'], sample_data['temperature']/10, label='Temp/10')
+        ax_enso_ts.set_title('ENSO vs Temperatura')
+        ax_enso_ts.legend()
+        ax_enso_ts.tick_params(axis='x', rotation=45)
         plt.tight_layout()
-        if save_path:
-            plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        plt.show()
+        fig_enso_ts.savefig(os.path.join(output_dir, f"{save_path_prefix}_enso_timeseries.png"), dpi=300, bbox_inches='tight')
+        plt.close(fig_enso_ts)
+        
+        fig_nao_ts, ax_nao_ts = plt.subplots(figsize=(10, 5))
+        ax_nao_ts.plot(sample_data['date'], sample_data['nao_index'], label='NAO')
+        ax_nao_ts.plot(sample_data['date'], sample_data['pressure']/1000, label='Press/1000')
+        ax_nao_ts.set_title('NAO vs Pressão')
+        ax_nao_ts.legend()
+        ax_nao_ts.tick_params(axis='x', rotation=45)
+        plt.tight_layout()
+        fig_nao_ts.savefig(os.path.join(output_dir, f"{save_path_prefix}_nao_timeseries.png"), dpi=300, bbox_inches='tight')
+        plt.close(fig_nao_ts)
     
-    def create_geographic_forecast_map(self, df, target_date=None, save_path=None):
+    def create_geographic_forecast_map(self, df, target_date=None, save_path="geographic_forecast_map.png"):
         """
-        Cria mapa geográfico com previsões
+        Cria mapa geográfico com previsões e salva como figura.
+        Salva a imagem na pasta 'resultados_forecastSynopticML'.
         """
+        output_dir = "resultados_forecastSynopticML"
+        os.makedirs(output_dir, exist_ok=True)
+        save_path_full = os.path.join(output_dir, os.path.basename(save_path))
+
         try:
             fig = plt.figure(figsize=(15, 10))
             ax = plt.axes(projection=ccrs.PlateCarree())
@@ -643,9 +659,8 @@ class SynopticMLForecast:
             plt.colorbar(scatter, ax=ax, label='Temperatura (°C)')
             plt.title('Distribuição de Temperatura - Estações Meteorológicas')
             
-            if save_path:
-                plt.savefig(save_path, dpi=300, bbox_inches='tight')
-            plt.show()
+            plt.savefig(save_path_full, dpi=300, bbox_inches='tight')
+            plt.close(fig)
             
         except ImportError:
             print("Cartopy não disponível. Criando gráfico alternativo...")
@@ -679,9 +694,8 @@ class SynopticMLForecast:
             plt.colorbar(scatter2, ax=ax2, label='Precipitação (mm)')
             
             plt.tight_layout()
-            if save_path:
-                plt.savefig(save_path, dpi=300, bbox_inches='tight')
-            plt.show()
+            plt.savefig(save_path_full, dpi=300, bbox_inches='tight')
+            plt.close(fig)
     
     def save_model(self, filename):
         """
