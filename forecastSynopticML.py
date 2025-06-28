@@ -18,7 +18,7 @@ import joblib
 import json
 import warnings
 import os
-from flask import Flask, request, render_template_string, jsonify
+from flask import Flask, request, render_template_string
 warnings.filterwarnings('ignore')
 
 class SynopticMLForecast:
@@ -480,9 +480,9 @@ class SynopticMLForecast:
     def create_forecast_visualization(self, predictions_dict=None, save_path_prefix="forecast_fig"):
         """
         Cria visualização das previsões e salva cada gráfico como figura separada.
-        Salva as imagens na pasta 'resultados_forecastSynopticML'.
+        Salva as imagens na pasta 'resultados_forecastSynopticML/graficos_mapas'.
         """
-        output_dir = "resultados_forecastSynopticML"
+        output_dir = os.path.join("resultados_forecastSynopticML", "graficos_mapas")
         os.makedirs(output_dir, exist_ok=True)
 
         targets = ['temp_1d', 'temp_3d', 'pressure_1d', 'pressure_3d', 'precip_1d', 'precip_3d']
@@ -529,9 +529,9 @@ class SynopticMLForecast:
     def create_prediction_plots(self, target_variable, save_path_prefix=None):
         """
         Cria gráficos de dispersão das previsões vs valores reais e salva cada gráfico como figura separada.
-        Salva as imagens na pasta 'resultados_forecastSynopticML'.
+        Salva as imagens na pasta 'resultados_forecastSynopticML/graficos_mapas'.
         """
-        output_dir = "resultados_forecastSynopticML"
+        output_dir = os.path.join("resultados_forecastSynopticML", "graficos_mapas")
         os.makedirs(output_dir, exist_ok=True)
 
         if target_variable not in self.models:
@@ -564,9 +564,9 @@ class SynopticMLForecast:
     def create_teleconnection_analysis(self, df, save_path_prefix="teleconnection_analysis"):
         """
         Cria visualização da análise de teleconexões e salva cada gráfico como figura separada.
-        Salva as imagens na pasta 'resultados_forecastSynopticML'.
+        Salva as imagens na pasta 'resultados_forecastSynopticML/graficos_mapas'.
         """
-        output_dir = "resultados_forecastSynopticML"
+        output_dir = os.path.join("resultados_forecastSynopticML", "graficos_mapas")
         os.makedirs(output_dir, exist_ok=True)
 
         correlations = self.analyze_teleconnections(df)
@@ -625,9 +625,9 @@ class SynopticMLForecast:
     def create_geographic_forecast_map(self, df, target_date=None, save_path="geographic_forecast_map.png"):
         """
         Cria mapa geográfico com previsões e salva como figura.
-        Salva a imagem na pasta 'resultados_forecastSynopticML'.
+        Salva a imagem na pasta 'resultados_forecastSynopticML/graficos_mapas'.
         """
-        output_dir = "resultados_forecastSynopticML"
+        output_dir = os.path.join("resultados_forecastSynopticML", "graficos_mapas")
         os.makedirs(output_dir, exist_ok=True)
         save_path_full = os.path.join(output_dir, os.path.basename(save_path))
 
@@ -700,8 +700,12 @@ class SynopticMLForecast:
     
     def save_model(self, filename):
         """
-        Salva o modelo treinado
+        Salva o modelo treinado na subpasta modelos_salvos dentro de resultados_forecastSynopticML
         """
+        # Diretório para salvar modelos
+        output_dir = os.path.join("resultados_forecastSynopticML", "modelos_salvos")
+        os.makedirs(output_dir, exist_ok=True)
+
         model_data = {
             'models': {},
             'scalers': {},
@@ -710,7 +714,7 @@ class SynopticMLForecast:
         }
         # Save each scaler with joblib and store file path
         for target, scaler in self.scalers.items():
-            scaler_file = f"{filename}_scaler_{target}.joblib"
+            scaler_file = os.path.join(output_dir, f"{filename}_scaler_{target}.joblib")
             joblib.dump(scaler, scaler_file)
             model_data['scalers'][target] = scaler_file
         
@@ -720,12 +724,13 @@ class SynopticMLForecast:
             for name, model_info in models.items():
                 if name != 'Ensemble' and 'lstm' not in target:
                     # Salvar modelos sklearn
+                    model_file = os.path.join(output_dir, f"{filename}_{target}_{name}.joblib")
                     model_data['models'][target][name] = {
                         'mae': model_info['mae'],
                         'r2': model_info['r2'],
-                        'model_file': f"{filename}_{target}_{name}.joblib"
+                        'model_file': model_file
                     }
-                    joblib.dump(model_info['model'], f"{filename}_{target}_{name}.joblib")
+                    joblib.dump(model_info['model'], model_file)
                 elif name == 'Ensemble':
                     model_data['models'][target][name] = {
                         'weights': model_info['weights'],
@@ -734,17 +739,20 @@ class SynopticMLForecast:
                     }
         
         # Salvar metadados
-        with open(f"{filename}_metadata.json", 'w') as f:
+        metadata_file = os.path.join(output_dir, f"{filename}_metadata.json")
+        with open(metadata_file, 'w') as f:
             json.dump(model_data, f, indent=2)
         
-        print(f"Modelo salvo como {filename}_metadata.json")
+        print(f"Modelo salvo como {metadata_file}")
     
     def load_model(self, filename):
         """
-        Carrega modelo salvo
+        Carrega modelo salvo da subpasta modelos_salvos dentro de resultados_forecastSynopticML
         """
+        output_dir = os.path.join("resultados_forecastSynopticML", "modelos_salvos")
+        metadata_file = os.path.join(output_dir, f"{filename}_metadata.json")
         # Carregar metadados
-        with open(f"{filename}_metadata.json", 'r') as f:
+        with open(metadata_file, 'r') as f:
             model_data = json.load(f)
         
         self.scalers = model_data['scalers']
@@ -760,11 +768,12 @@ class SynopticMLForecast:
                     model_info['model'] = joblib.load(model_info['model_file'])
                 self.models[target][name] = model_info
         
-        print(f"Modelo carregado de {filename}_metadata.json")
+        print(f"Modelo carregado de {metadata_file}")
     
     def generate_forecast_report(self, df, save_path=None):
         """
-        Gera relatório completo de previsão
+        Gera relatório completo de previsão e salva em JSON e CSV (se possível)
+        na subpasta 'relatorios' dentro de 'resultados_forecastSynopticML'.
         """
         report = {
             'timestamp': datetime.now().isoformat(),
@@ -777,17 +786,15 @@ class SynopticMLForecast:
             'model_performance': {},
             'teleconnection_analysis': self.analyze_teleconnections(df)
         }
-        
+
         # Performance dos modelos
         for target, models in self.models.items():
             report['model_performance'][target] = {}
-            # Se models for um dicionário (ensemble/sklearn), iterar normalmente
             if isinstance(models, dict):
                 for name, model_info in models.items():
                     if isinstance(model_info, dict) and 'mae' in model_info and 'r2' in model_info:
                         mae = model_info['mae']
                         r2 = model_info['r2']
-                        # Se for lista, pega o primeiro elemento
                         if isinstance(mae, list):
                             mae = mae[0] if len(mae) > 0 else None
                         if isinstance(r2, list):
@@ -796,19 +803,44 @@ class SynopticMLForecast:
                             'mae': float(mae) if mae is not None else None,
                             'r2': float(r2) if r2 is not None else None
                         }
-            # Se models for um resultado LSTM (dict com 'mae' e 'r2')
             elif isinstance(models, object) and hasattr(models, 'get'):
                 if 'mae' in models and 'r2' in models:
                     report['model_performance'][target] = {
                         'mae': float(models['mae']),
                         'r2': float(models['r2'])
                     }
-        
-        # Salvar relatório
-        if save_path:
-            with open(save_path, 'w') as f:
-                json.dump(report, f, indent=2, default=str)
-        
+
+        # Diretório de saída
+        output_dir = os.path.join("resultados_forecastSynopticML", "relatorios")
+        os.makedirs(output_dir, exist_ok=True)
+
+        # Caminhos dos arquivos
+        if save_path is None:
+            json_path = os.path.join(output_dir, "forecast_report.json")
+            csv_path = os.path.join(output_dir, "forecast_report.csv")
+        else:
+            base = os.path.splitext(os.path.basename(save_path))[0]
+            json_path = os.path.join(output_dir, f"{base}.json")
+            csv_path = os.path.join(output_dir, f"{base}.csv")
+
+        # Salvar JSON
+        with open(json_path, 'w') as f:
+            json.dump(report, f, indent=2, default=str)
+
+        # Salvar CSV (apenas model_performance, se possível)
+        try:
+            perf_rows = []
+            for target, models in report['model_performance'].items():
+                for name, metrics in models.items():
+                    row = {'target': target, 'model': name}
+                    row.update(metrics)
+                    perf_rows.append(row)
+            if perf_rows:
+                perf_df = pd.DataFrame(perf_rows)
+                perf_df.to_csv(csv_path, index=False)
+        except Exception as e:
+            print(f"Erro ao salvar relatório em CSV: {e}")
+
         return report
 
 
@@ -903,87 +935,34 @@ if __name__ == "__main__":
     forecast_system, data, results = main()
 
 # Classe para interface web simples
+from flask import Flask, request, render_template_string
+
 class ForecastWebInterface:
     """
-    ForecastWebInterface
-    Classe responsável por fornecer uma interface web simples para o sistema de previsão meteorológica baseado em Machine Learning.
-    Esta classe utiliza o Flask para criar um servidor web local, permitindo ao usuário inserir dados meteorológicos via formulário HTML e obter previsões de temperatura para 1 dia à frente, juntamente com a confiança do modelo. Os resultados e o formulário são salvos em HTML para consulta posterior.
-    A interface é adequada para demonstrações, testes e uso local, facilitando a interação com o sistema de previsão sem necessidade de conhecimento técnico avançado.
-    Atributos:
-        forecast_system: Instância do sistema de previsão meteorológica que implementa o método `predict_weather`.
-    Métodos:
-        run(host="127.0.0.1", port=8080):
-            Inicia o servidor web local e disponibiliza o formulário de entrada de dados meteorológicos.
-        create_input_form(prediction=None, confidence=None, error=None):
-            Gera o HTML do formulário de entrada e exibe o resultado da previsão, se disponível.
-    """
-    """
-    Interface web simples para a plataforma de previsão
+    Classe responsável por fornecer uma interface web simples para o sistema de previsão meteorológica.
     """
     def __init__(self, forecast_system):
         self.forecast_system = forecast_system
 
-    def run(self, host="127.0.0.1", port=8080):
+    def generate_html(self, prediction=None, confidence=None, error=None):
         """
-        Inicia um servidor web local para a interface de previsão.
+        Gera e salva o HTML da interface web sem iniciar o servidor.
+        Salva o HTML na subpasta interface_web dentro da pasta resultados_forecastSynopticML.
         """
-
-        app = Flask(__name__)
-
-        @app.route("/", methods=["GET", "POST"])
-        def index():
-            prediction = None
-            confidence = None
-            error = None
-            if request.method == "POST":
-                try:
-                    # Coletar dados do formulário
-                    input_data = {
-                        "lat": float(request.form.get("lat", -15.7801)),
-                        "lon": float(request.form.get("lon", -47.9292)),
-                        "temperature": float(request.form.get("temperature", 25.0)),
-                        "pressure": float(request.form.get("pressure", 1013.2)),
-                        "humidity": float(request.form.get("humidity", 70.0)),
-                        "wind_speed": float(request.form.get("wind_speed", 5.0)),
-                        "enso_index": float(request.form.get("enso_index", 0.0)),
-                        "nao_index": float(request.form.get("nao_index", 0.0)),
-                        # Preencher valores padrão para variáveis obrigatórias
-                        "day_of_year": 180,
-                        "month": 6,
-                        "season": 2,
-                        "precipitation": 0.0,
-                        "wind_direction": 180.0,
-                        "dewpoint": 15.0,
-                        "heat_index": 25.0,
-                        "pressure_gradient": 1.0,
-                        "vorticity": 0.0
-                    }
-                    preds = self.forecast_system.predict_weather(input_data, "temp_1d")
-                    if "Ensemble" in preds:
-                        prediction = float(preds["Ensemble"][0])
-                        confidence = "R²: {:.1f}%".format(
-                            100 * self.forecast_system.models["temp_1d"]["Ensemble"]["r2"]
-                        )
-                    else:
-                        # Pega o primeiro modelo disponível
-                        key = next(iter(preds))
-                        prediction = float(preds[key][0])
-                        confidence = "Modelo: {}".format(key)
-                except Exception as ex:
-                    error = f"Erro ao processar previsão: {ex}"
-
-            html_form = self.create_input_form(prediction, confidence, error)
-            # Salvar HTML na pasta raiz do projeto
-            html_path = "ForecastWebInterface.html"
-            try:
-                with open(html_path, "w", encoding="utf-8") as f:
-                    f.write(html_form)
-            except Exception as e:
-                print(f"Erro ao salvar HTML: {e}")
-            return render_template_string(html_form)
-
-        print(f"Interface web disponível em http://{host}:{port}")
-        app.run(host=host, port=port, debug=False)
+        html_form = self.create_input_form(prediction, confidence, error)
+        
+        # Salvar HTML na pasta resultados_forecastSynopticML/interface_web
+        output_dir = os.path.join("resultados_forecastSynopticML", "interface_web")
+        os.makedirs(output_dir, exist_ok=True)
+        html_path = os.path.join(output_dir, "ForecastWebInterface.html")
+        try:
+            with open(html_path, "w", encoding="utf-8") as f:
+                f.write(html_form)
+            print(f"Arquivo HTML gerado com sucesso: {html_path}")
+            return True
+        except Exception as e:
+            print(f"Erro ao salvar HTML: {e}")
+            return False
 
     def create_input_form(self, prediction=None, confidence=None, error=None):
         """
@@ -1063,6 +1042,64 @@ class ForecastWebInterface:
         </html>
         """
         return html_form
+
+    def run(self, host="127.0.0.1", port=8080):
+        """
+        Inicia um servidor web local para a interface de previsão.
+        """
+        app = Flask(__name__)
+
+        @app.route("/", methods=["GET", "POST"])
+        def index():
+            prediction = None
+            confidence = None
+            error = None
+            if request.method == "POST":
+                try:
+                    # Coletar dados do formulário
+                    input_data = {
+                        "lat": float(request.form.get("lat", -15.7801)),
+                        "lon": float(request.form.get("lon", -47.9292)),
+                        "temperature": float(request.form.get("temperature", 25.0)),
+                        "pressure": float(request.form.get("pressure", 1013.2)),
+                        "humidity": float(request.form.get("humidity", 70.0)),
+                        "wind_speed": float(request.form.get("wind_speed", 5.0)),
+                        "enso_index": float(request.form.get("enso_index", 0.0)),
+                        "nao_index": float(request.form.get("nao_index", 0.0)),
+                        "day_of_year": 180,
+                        "month": 6,
+                        "season": 2,
+                        "precipitation": 0.0,
+                        "wind_direction": 180.0,
+                        "dewpoint": 15.0,
+                        "heat_index": 25.0,
+                        "pressure_gradient": 1.0,
+                        "vorticity": 0.0
+                    }
+                    preds = self.forecast_system.predict_weather(input_data, "temp_1d")
+                    if "Ensemble" in preds:
+                        prediction = float(preds["Ensemble"][0])
+                        confidence = "R²: {:.1f}%".format(
+                            100 * self.forecast_system.models["temp_1d"]["Ensemble"]["r2"]
+                        )
+                    else:
+                        key = next(iter(preds))
+                        prediction = float(preds[key][0])
+                        confidence = "Modelo: {}".format(key)
+                except Exception as ex:
+                    error = f"Erro ao processar previsão: {ex}"
+
+            html_form = self.create_input_form(prediction, confidence, error)
+            self.generate_html(prediction, confidence, error)
+            return render_template_string(html_form)
+
+        print(f"Interface web disponível em http://{host}:{port}")
+        app.run(host=host, port=port, debug=False)
+
+# Crie uma instância da sua classe de previsão (mock se necessário)
+forecast_system = SynopticMLForecast()
+web_interface = ForecastWebInterface(forecast_system)
+web_interface.generate_html()  # Gera o HTML com valores padrão
 
 # Utilitários para processamento de dados reais
 # Classe utilitária para carregar, processar e derivar variáveis de dados meteorológicos reais
