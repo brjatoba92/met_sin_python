@@ -300,6 +300,155 @@ Parâmetros ajustáveis:
 
 ---
 
+# 3 - Plataforma de Previsão Sinótica com Machine Learning
+
+![Exemplo de Visualização](https://via.placeholder.com/800x400?text=Exemplo+de+Previsão+Meteorológica)
+
+Uma plataforma avançada para previsão meteorológica utilizando técnicas de Machine Learning, capaz de gerar previsões de temperatura, pressão e precipitação com até 3 dias de antecedência.
+
+## 📌 Visão Geral
+
+Este projeto implementa um sistema completo de previsão meteorológica que combina:
+- Modelos ensemble de Machine Learning (Random Forest, Gradient Boosting e MLP)
+- Redes neurais LSTM para análise de séries temporais
+- Análise de teleconexões climáticas (ENSO, NAO)
+- Visualização geoespacial de dados meteorológicos
+- Interface web para interação com o usuário
+
+## 🚀 Funcionalidades Principais
+
+- **Geração de dados sintéticos** para simulação de condições meteorológicas
+- **Previsão multivariada** (temperatura, pressão, precipitação)
+- **Horizontes de previsão** (1 dia e 3 dias)
+- **Análise de teleconexões** entre padrões climáticos globais e condições locais
+- **Visualização automática** de resultados e métricas de desempenho
+- **Interface web integrada** para teste dos modelos
+- **Processamento de dados reais** (formato NOAA)
+
+## 📦 Estrutura do Código
+
+O projeto está organizado em três classes principais:
+
+1. **`SynopticMLForecast`**: Classe principal que implementa toda a lógica de previsão
+   - Geração de dados sintéticos
+   - Treinamento de modelos
+   - Análise de teleconexões
+   - Visualização de resultados
+
+2. **`ForecastWebInterface`**: Interface web baseada em Flask para interação com o usuário
+   - Formulário HTML para entrada de dados
+   - Exibição de previsões
+   - Geração automática de relatório HTML
+
+3. **`WeatherDataProcessor`**: Utilitário para processamento de dados reais
+   - Carregamento de arquivos CSV
+   - Adaptação de formato NOAA
+   - Cálculo de variáveis derivadas
+
+## 🛠️ Instalação e Uso
+
+### Pré-requisitos
+- Python 3.7+
+- Bibliotecas listadas em `requirements.txt`
+
+```bash
+pip install -r requirements.txt
+```
+
+### Executando o exemplo principal
+
+```python
+python3 forecastSynopticML.py
+```
+
+Isso irá:
+1. Gerar dados sintéticos
+2. Treinar todos os modelos
+3. Realizar análises de teleconexões
+4. Gerar visualizações
+5. Salvar o modelo treinado
+
+### Usando a interface web
+
+```python
+from synoptic_forecast import SynopticMLForecast, ForecastWebInterface
+
+# Inicializar sistema
+forecast_system = SynopticMLForecast()
+
+# Carregar modelo pré-treinado ou treinar novo
+forecast_system.load_model('synoptic_forecast_model')
+
+# Iniciar interface web
+web_interface = ForecastWebInterface(forecast_system)
+web_interface.run()
+```
+
+Acesse `http://127.0.0.1:8080` no seu navegador.
+
+## 📊 Saídas Geradas
+
+![Forecast Precip 1d](resultados_forecastSynopticML/forecast_fig_precip_1d.png)
+![Map](resultados_forecastSynopticML/geographic_forecast_map.png)
+![Prediction](resultados_forecastSynopticML/prediction_temp_1d_RandomForest.png)
+![Teleconnection](resultados_forecastSynopticML/teleconnection_analysis_enso_timeseries.png)
+![Teleconnection_enso](resultados_forecastSynopticML/teleconnection_analysis_enso.png)
+
+O sistema gera automaticamente na pasta `resultados_forecastSynopticML`:
+- Gráficos de desempenho dos modelos
+- Mapas geográficos com distribuição das variáveis
+- Análises de correlação com teleconexões
+- Relatório JSON completo (`forecast_report.json`)
+- Modelos treinados (arquivos `.joblib` e metadados JSON)
+
+## 🔍 Métricas de Desempenho
+
+Os modelos são avaliados usando:
+- **MAE (Mean Absolute Error)**
+- **MSE (Mean Squared Error)**
+- **R² (Coeficiente de Determinação)**
+
+Exemplo de saída:
+```
+Treinando modelos para temp_1d...
+  RandomForest - MAE: 0.701, R²: 0.962
+  GradientBoosting - MAE: 0.723, R²: 0.959
+  MLP - MAE: 0.735, R²: 0.957
+  Ensemble - MAE: 0.692, R²: 0.964
+```
+
+## 🌐 Teleconexões Analisadas
+
+O sistema calcula correlações entre:
+- **ENSO (El Niño Southern Oscillation)**
+- **NAO (North Atlantic Oscillation)**
+  
+Com variáveis meteorológicas locais (temperatura, pressão, precipitação), incluindo análises regionais (Norte/Sul).
+
+## 📁 Estrutura de Arquivos
+
+```
+├── synoptic_forecast.py          # Código principal
+├── requirements.txt              # Dependências
+├── resultados_forecastSynopticML # Pasta de saídas
+│   ├── forecast_*.png            # Gráficos de previsão
+│   ├── teleconnection_*.png      # Análises de teleconexões
+│   ├── geographic_*.png          # Mapas geográficos
+│   └── forecast_report.json      # Relatório completo
+├── synoptic_forecast_model_metadata.json  # Metadados do modelo
+└── *.joblib                      # Modelos treinados
+```
+
+## 🤝 Contribuição
+
+Contribuições são bem-vindas! Siga os passos:
+1. Faça um fork do projeto
+2. Crie sua branch (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
+
+
 ## **📜 Licença**  
 Este projeto é open-source (MIT). Sinta-se à vontade para **contribuir, modificar e distribuir**!  
 
