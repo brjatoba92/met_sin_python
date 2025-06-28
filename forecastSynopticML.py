@@ -898,9 +898,25 @@ def main():
     
     return forecast_system, df, results
 
+if __name__ == "__main__":
+    # Executar exemplo principal
+    forecast_system, data, results = main()
 
 # Classe para interface web simples
 class ForecastWebInterface:
+    """
+    ForecastWebInterface
+    Classe responsável por fornecer uma interface web simples para o sistema de previsão meteorológica baseado em Machine Learning.
+    Esta classe utiliza o Flask para criar um servidor web local, permitindo ao usuário inserir dados meteorológicos via formulário HTML e obter previsões de temperatura para 1 dia à frente, juntamente com a confiança do modelo. Os resultados e o formulário são salvos em HTML para consulta posterior.
+    A interface é adequada para demonstrações, testes e uso local, facilitando a interação com o sistema de previsão sem necessidade de conhecimento técnico avançado.
+    Atributos:
+        forecast_system: Instância do sistema de previsão meteorológica que implementa o método `predict_weather`.
+    Métodos:
+        run(host="127.0.0.1", port=8080):
+            Inicia o servidor web local e disponibiliza o formulário de entrada de dados meteorológicos.
+        create_input_form(prediction=None, confidence=None, error=None):
+            Gera o HTML do formulário de entrada e exibe o resultado da previsão, se disponível.
+    """
     """
     Interface web simples para a plataforma de previsão
     """
@@ -957,10 +973,8 @@ class ForecastWebInterface:
                     error = f"Erro ao processar previsão: {ex}"
 
             html_form = self.create_input_form(prediction, confidence, error)
-            # Salvar HTML na pasta resultados_forecastSynopticML
-            output_dir = "resultados_forecastSynopticML"
-            os.makedirs(output_dir, exist_ok=True)
-            html_path = os.path.join(output_dir, "web_interface_last.html")
+            # Salvar HTML na pasta raiz do projeto
+            html_path = "ForecastWebInterface.html"
             try:
                 with open(html_path, "w", encoding="utf-8") as f:
                     f.write(html_form)
@@ -1050,11 +1064,14 @@ class ForecastWebInterface:
         """
         return html_form
 
-
 # Utilitários para processamento de dados reais
+# Classe utilitária para carregar, processar e derivar variáveis de dados meteorológicos reais
 class WeatherDataProcessor:
     """
-    Processador para dados meteorológicos reais
+    Processador para dados meteorológicos reais.
+    Fornece métodos para carregar dados de arquivos CSV, adaptar dados no formato NOAA
+    para o formato padrão utilizado na plataforma, e calcular variáveis meteorológicas derivadas
+    como índice de calor, ponto de orvalho e conversão de unidades de vento.
     """
     @staticmethod
     def load_csv_data(filepath):
@@ -1067,7 +1084,7 @@ class WeatherDataProcessor:
         except Exception as e:
             print(f"Erro ao carregar arquivo: {e}")
             return None
-    
+
     @staticmethod
     def process_noaa_data(df):
         """
@@ -1083,24 +1100,24 @@ class WeatherDataProcessor:
             'WDDIR': 'wind_direction',
             'PRCP': 'precipitation'
         }
-        
+
         df_processed = df.rename(columns=column_mapping)
-        
+
         # Converter unidades se necessário
         if 'temperature' in df_processed.columns:
             # Converter Fahrenheit para Celsius se necessário
             if df_processed['temperature'].max() > 50:
                 df_processed['temperature'] = (df_processed['temperature'] - 32) * 5/9
-        
+
         return df_processed
-    
+
     @staticmethod
     def calculate_derived_variables(df):
         """
         Calcula variáveis meteorológicas derivadas
         """
         df_derived = df.copy()
-        
+
         # Índice de calor
         if 'temperature' in df.columns and 'humidity' in df.columns:
             df_derived['heat_index'] = df.apply(
@@ -1108,21 +1125,45 @@ class WeatherDataProcessor:
                     row['temperature'], row.get('humidity', 50)
                 ), axis=1
             )
-        
+
         # Ponto de orvalho a partir de temperatura e umidade
         if 'temperature' in df.columns and 'humidity' in df.columns:
             df_derived['dewpoint_calc'] = df_derived['temperature'] - (
                 (100 - df_derived['humidity']) / 5
             )
-        
+
         # Velocidade do vento em diferentes unidades
         if 'wind_speed' in df.columns:
             df_derived['wind_speed_kmh'] = df_derived['wind_speed'] * 3.6
             df_derived['wind_speed_knots'] = df_derived['wind_speed'] * 1.944
-        
+
         return df_derived
 
-
+# Exemplo de uso da classe WeatherDataProcessor
 if __name__ == "__main__":
-    # Executar exemplo principal
-    forecast_system, data, results = main()
+    # Caminho para um arquivo CSV de exemplo (substitua pelo seu arquivo real)
+    csv_path = "exemplo_dados_meteorologicos.csv"
+
+    # Carregar dados
+    df = WeatherDataProcessor.load_csv_data(csv_path)
+    if df is not None:
+        print("Dados carregados:")
+        print(df.head())
+
+        # Processar dados NOAA (se aplicável)
+        df_proc = WeatherDataProcessor.process_noaa_data(df)
+        print("Dados processados (NOAA):")
+        print(df_proc.head())
+
+        # Calcular variáveis derivadas
+        df_derived = WeatherDataProcessor.calculate_derived_variables(df_proc)
+        print("Dados com variáveis derivadas:")
+        print(df_derived.head())
+
+        # Salvar resultados na pasta resultados_forecastSynopticML
+        output_dir = "resultados_forecastSynopticML"
+        os.makedirs(output_dir, exist_ok=True)
+        df_proc.to_csv(os.path.join(output_dir, "dados_processados_NOAA.csv"), index=False)
+        df_derived.to_csv(os.path.join(output_dir, "dados_com_variaveis_derivadas.csv"), index=False)
+
+
