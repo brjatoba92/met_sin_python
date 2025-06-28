@@ -388,11 +388,11 @@ Acesse `http://127.0.0.1:8080` no seu navegador.
 
 ## 📊 Saídas Geradas
 
-![Forecast Precip 1d](resultados_forecastSynopticML/forecast_fig_precip_1d.png)
-![Map](resultados_forecastSynopticML/geographic_forecast_map.png)
-![Prediction](resultados_forecastSynopticML/prediction_temp_1d_RandomForest.png)
-![Teleconnection](resultados_forecastSynopticML/teleconnection_analysis_enso_timeseries.png)
-![Teleconnection_enso](resultados_forecastSynopticML/teleconnection_analysis_enso.png)
+![Forecast Precip 1d](resultados_forecastSynopticML/graficos_mapas/forecast_fig_precip_1d.png)
+![Map](resultados_forecastSynopticML/graficos_mapas/geographic_forecast_map.png)
+![Prediction](resultados_forecastSynopticML/graficos_mapas/prediction_temp_1d_RandomForest.png)
+![Teleconnection](resultados_forecastSynopticML/graficos_mapas/teleconnection_analysis_enso_timeseries.png)
+![Teleconnection_enso](resultados_forecastSynopticML/graficos_mapas/teleconnection_analysis_enso.png)
 
 O sistema gera automaticamente na pasta `resultados_forecastSynopticML`:
 - Gráficos de desempenho dos modelos
@@ -428,15 +428,11 @@ Com variáveis meteorológicas locais (temperatura, pressão, precipitação), i
 ## 📁 Estrutura de Arquivos
 
 ```
-├── synoptic_forecast.py          # Código principal
-├── requirements.txt              # Dependências
-├── resultados_forecastSynopticML # Pasta de saídas
-│   ├── forecast_*.png            # Gráficos de previsão
-│   ├── teleconnection_*.png      # Análises de teleconexões
-│   ├── geographic_*.png          # Mapas geográficos
-│   └── forecast_report.json      # Relatório completo
-├── synoptic_forecast_model_metadata.json  # Metadados do modelo
-└── *.joblib                      # Modelos treinados
+resultados_forecastSynopticML/
+├── graficos_mapas/          # Gráficos e mapas gerados
+├── modelos_salvos/          # Modelos treinados
+├── relatorios/              # Relatórios de análise
+└── interface_web/           # Interface HTML
 ```
 
 ## 🤝 Contribuição
